@@ -14,6 +14,7 @@ export class Store {
   drone: DroneState | null = null;
   heatmap: Heatmap = { zones: {}, points: [] };
   funnels: Funnel[] = [];
+  lastEventReceived = performance.now();
   private seen = new Set<string>();
   reset() { this.events = []; this.tasks = []; this.drone = null; this.heatmap = { zones: {}, points: [] }; this.funnels = []; this.seen.clear(); }
   ingest(msg: Message) {
@@ -22,6 +23,7 @@ export class Store {
       if (e.event_id && this.seen.has(e.event_id)) return;
       if (e.event_id) this.seen.add(e.event_id);
       this.events.unshift(e);
+      this.lastEventReceived = performance.now();
       if (this.events.length > 1000) { const dropped = this.events.pop(); if (dropped) this.seen.delete(dropped.event_id); }
       if (e.type === 'look') {
         const zone = this.heatmap.zones[e.zone_id] ?? { look_s: 0, looks: 0 };
