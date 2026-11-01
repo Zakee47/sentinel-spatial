@@ -1,0 +1,10 @@
+# camera id (as in config/site.yaml `cameras[].id`) -> stream URI.
+# Copy to cameras.local.yaml (gitignored) for real cameras. Put credentials in env
+# and reference them as ${VAR}; they are URL-encoded and never logged.
+cameras:
+  - id: camera-1
+    uri: rtsp://localhost:8554/camera-1          # cctv/mock_cctv.sh (looped stock footage)
+  # - id: camera-2
+  #   uri: rtsp://${CAM2_USER}:${CAM2_PASS}@192.168.1.64:554/Streaming/Channels/102   # Hikvision substream
+  # - id: camera-3
+  #   uri: http://192.168.1.70/video.mjpg                                             # MJPEG over HTTP

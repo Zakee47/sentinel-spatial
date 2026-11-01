@@ -1,0 +1,1 @@
+[{"id":"camera-1","uri":"rtsp://localhost:8554/camera-1","snapshot_url":"/cameras/camera-1/snapshot.jpg","feed_url":"/cameras/camera-1/mjpeg","connected":true,"frames":105,"dropped":104,"reconnects":0,"fps":30.04,"last_frame_age_s":0.03,"width":1280,"height":720,"last_error":null}]
