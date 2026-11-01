@@ -1,0 +1,12 @@
+lib/arm64-v8a/libdatajar.so KeySendVirtualStickFlightControlData
+lib/arm64-v8a/libdatajar.so KeyVirtualStickControlModeEnabled
+lib/arm64-v8a/libdatajar.so Lcom/uav/component/fpv/base/debug/VirtualStickDebugConfig
+lib/arm64-v8a/libdatajar.so Lcom/uav/component/fpv/mvi/slots/widgets/virtualcontrol/MviVirtualStickView
+lib/arm64-v8a/libdatajar.so Lcom/uav/livestream/LiveStreamSession
+lib/arm64-v8a/libdatajar.so Lcom/uav/livestream/core/audio/LiveStreamAudioEncoder
+lib/arm64-v8a/libdatajar.so Lcom/uav/livestream/core/video/LiveStreamVideoEncoder
+lib/arm64-v8a/libdatajar.so Luav/ksdk/keyvalue/key/UAVOcuSyncKey
+lib/arm64-v8a/libdatajar.so Luav/sdk/keyvalue/key/UAVOcuSyncKey
+lib/arm64-v8a/libdatajar.so NEO2
+lib/arm64-v8a/libdatajar.so OCUSYNC
+lib/arm64-v8a/libdatajar.so OcuSyncLink

@@ -1,0 +1,14 @@
+android.hardware.bluetooth_le required=true
+android.hardware.usb.host required=false
+android.hardware.usb.accessory required=true
+android.hardware.camera required=true
+android.hardware.camera.autofocus required=false
+android.hardware.camera.front required=false
+android.hardware.microphone required=false
+android.hardware.wifi required=true
+android.hardware.sensor.accelerometer required=false
+android.hardware.location required=true
+android.hardware.location.gps required=false
+android.hardware.telephony required=false
+android.hardware.camera.flash required=false
+android.hardware.screen.landscape required=false
