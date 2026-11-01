@@ -1,0 +1,7 @@
+Lcom/amap/api/maps/model/PolylineOptions$LineCapType;
+Lcom/amap/api/maps/model/PolylineOptions$LineJoinType;
+Lcom/amap/api/maps/model/PolylineOptions;
+Lcom/amap/api/maps/model/PolylineOptionsCreator;
+PolylineOptions
+arrowLineOuterResId
+nativeOnSingleTapLineOverlay
