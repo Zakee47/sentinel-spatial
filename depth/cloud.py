@@ -226,11 +226,16 @@ def read_cloud(path: Path, mesh_points: int = 200000) -> tuple[Array, Array]:
 
         scene = trimesh.load_scene(str(path))
         mesh = scene.to_geometry()
+        if not isinstance(mesh, trimesh.Trimesh):
+            raise ValueError("Scene contains no triangle mesh")
         points, faces = trimesh.sample.sample_surface(mesh, mesh_points)
-        visual = (
-            mesh.visual.to_color() if mesh.visual.kind == "texture" else mesh.visual
-        )
-        colors = np.asarray(visual.face_colors[faces, :3], dtype=float) / 255
+        visual = mesh.visual
+        if isinstance(visual, trimesh.visual.texture.TextureVisuals):
+            visual = visual.to_color()
+        if isinstance(visual, trimesh.visual.color.ColorVisuals):
+            colors = np.asarray(visual.face_colors[faces, :3], dtype=float) / 255
+        else:
+            colors = np.full_like(points, 0.6)
         return points, colors
     import open3d as o3d
 
