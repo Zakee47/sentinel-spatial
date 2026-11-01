@@ -69,7 +69,7 @@ def sales_today(
         for p in products():
             pid = p["product_id"]
             units = (
-                rng.randint(0, 1) if pid == LOW_CONVERSION_SKU else rng.randint(2, 9)
+                rng.randint(0, 1) if pid == LOW_CONVERSION_SKU else rng.randint(4, 8)
             )
             rows.append((ts_hour, pid, units))
     return rows
