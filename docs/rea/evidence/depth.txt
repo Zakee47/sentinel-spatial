@@ -1,0 +1,81 @@
+[REA top-level class names]
+(no matches)
+[classes.dex identifier strings; substring matches may be unrelated]
+Ljava/lang/IndexOutOfBoundsException;
+Ljava/lang/OutOfMemoryError;
+appendToFile
+correctOfflineLocation
+getOfflineLoc
+getOfflineMapCityList
+getOfflineMapProvinceList
+getStartOffset
+getTimeToFirstFix
+glDepthMask
+initOfflineCore
+initOfflineManager
+isTraceWriteToFile
+mIsTraceWriteToFile
+mStartOffset
+moveToFirst
+nativeSetOfflineDataEnable
+postAtFrontOfQueue
+saveJSONObjectToFile
+setOfflineDataEnable
+setOffset
+setStartOffset
+setTraceWriteToFile
+syncDataToFile
+writeDatasToFile
+writeToFile
+[manifest flight-record components]
+activity com.uav.flightrecordui.list.FlightRecordActivity2
+activity com.uav.flightrecordui.map.FlightRecordMapActivity
+activity com.uav.flightrecordui.thumbnail.FlightRecordThumbnailActivity
+activity com.uav.flightrecordui.batchdownload.FlightRecordDownloadActivity
+activity uav.fr.view.permission.FlightRecordPrivacyActivity
+activity com.uav.service.userlog.select.flightrecord.FlightRecordSelectActivity
+[selected native identifier strings; not evidence of execution]
+lib/arm64-v8a/libdatajar.so AllDirectionsObstacleDistanceInfoByteArray
+lib/arm64-v8a/libdatajar.so AllDirectionsObstacleDistanceInfoConverter
+lib/arm64-v8a/libdatajar.so AndroidSdrFlightOSDTopObstacleVisionShellModel
+lib/arm64-v8a/libdatajar.so BaseFlightOSDTopObstacleVisionShell
+lib/arm64-v8a/libdatajar.so ObstacleDetectionSector
+lib/arm64-v8a/libdatajar.so ObstacleDetectionSectorWarning
+lib/arm64-v8a/libdatajar.so ObstacleDirection
+lib/arm64-v8a/libdatajar.so ObstacleWarningMinDistance
+lib/arm64-v8a/libdatajar.so OmniDownRadarDistance
+lib/arm64-v8a/libdatajar.so OmniHorizontalRadarDistance
+lib/arm64-v8a/libdatajar.so OmniUpRadarDistance
+lib/arm64-v8a/libdatajar.so OmnidirectionalObstacleAvoidance
+lib/arm64-v8a/libdatajar.so OmnidirectionalRadarStatus
+lib/arm64-v8a/libdatajar.so RadarObstacleInfo
+lib/arm64-v8a/libdatajar.so downObstacleDistance
+lib/arm64-v8a/libdatajar.so obstacleDistanceInMeters
+lib/arm64-v8a/libfr_engine.so _ZN3uav12FlightRecord18FlightRecordEngine23UpdateObstacleDistancesEPvm
+lib/arm64-v8a/libfr_engine.so _ZN3uav12FlightRecord18FlightRecordEngine31EnablePerceptionGroupDataRecordEv
+lib/arm64-v8a/libfr_std_cpp.so ObstacleDetectionSector
+lib/arm64-v8a/libfr_std_cpp.so ObstacleDetectionSectorWarning
+lib/arm64-v8a/libfr_std_cpp.so ObstacleDirection
+lib/arm64-v8a/libfr_std_cpp.so PerceptionObstacleDistances
+lib/arm64-v8a/libfr_std_cpp.so PerceptionState
+lib/arm64-v8a/libfr_std_cpp.so RadarObstacleInfo
+lib/arm64-v8a/libfr_std_cpp.so downObstacleDistance
+lib/arm64-v8a/libfr_std_cpp.so horizontalObstacleDistances
+lib/arm64-v8a/libfr_std_cpp.so obstacleDistanceInMeters
+lib/arm64-v8a/libfr_std_cpp.so upObstacleDistance
+lib/arm64-v8a/libsdk_jni.so N3uav3sdk3key18PackObserverHelperINS_4core33perception_birdview_distance_pushEEE
+lib/arm64-v8a/libsdk_jni.so ObstacleAvoidanceV1
+lib/arm64-v8a/libsdk_jni.so ObstacleWarningMinDistance
+lib/arm64-v8a/libsdk_jni.so OmniDownRadarDistance
+lib/arm64-v8a/libsdk_jni.so OmniHorizontalRadarDistance
+lib/arm64-v8a/libsdk_jni.so OmniUpRadarDistance
+lib/arm64-v8a/libsdk_jni.so OmnidirectionalObstacleAvoidance
+lib/arm64-v8a/libsdk_jni.so OmnidirectionalRadarStatus
+lib/arm64-v8a/libsdk_key_value.so ObstacleDetectionSector
+lib/arm64-v8a/libsdk_key_value.so ObstacleWarningMinDistance
+lib/arm64-v8a/libsdk_key_value.so OmniDownRadarDistance
+lib/arm64-v8a/libsdk_key_value.so OmniHorizontalRadarDistance
+lib/arm64-v8a/libsdk_key_value.so OmniUpRadarDistance
+lib/arm64-v8a/libsdk_key_value.so OmnidirectionalObstacleAvoidance
+lib/arm64-v8a/libsdk_key_value.so OmnidirectionalRadarStatus
+lib/arm64-v8a/libsdk_key_value.so RadarObstacleInfo
