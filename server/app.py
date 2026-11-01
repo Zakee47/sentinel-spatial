@@ -16,7 +16,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import Body, FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from . import db, logic
 from .config import REPO_ROOT, load_site, raw_site
@@ -79,6 +79,10 @@ class ReviewIn(BaseModel):
 
 
 class DroneState(BaseModel):
+    model_config = ConfigDict(
+        extra="allow"
+    )  # drone/ may add piloted, flight, fix_source, ...
+
     ts: str | None = None
     mode: Literal["sim", "live"] = "sim"
     state: Literal[
@@ -453,8 +457,10 @@ async def post_drone_state(st: DroneState) -> dict[str, bool]:
     m = _active_mission()
     if m and st.mission_id == m["mission_id"] and m["status"] == "pending":
         m["status"] = "active"
-    elif m and m["status"] == "active" and st.state == "IDLE":
-        m["status"] = "done"
+    elif m and m["status"] == "active" and st.state == "IDLE" and st.mission_id is None:
+        m["status"] = (
+            "done"  # dequeued: GET /api/drone/mission now returns the next pending one
+        )
     S.drone = st
     await S.hub.broadcast("drone", st.model_dump())
     return {"ok": True}
