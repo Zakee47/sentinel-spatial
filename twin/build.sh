@@ -4,7 +4,7 @@ root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 python=${PYTHON:-"$root/twin/.venv/bin/python"}
 out=${TWIN_OUT_DIR:-"$root/twin/out"}
 if [[ "$out" != /* ]]; then out="$root/$out"; fi
-out=$(realpath -m "$out")
+out=$("$python" -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).resolve())' "$out")
 if [[ ! -x "$python" ]] && ! command -v "$python" >/dev/null; then
   echo 'Setup: python3 -m venv twin/.venv && twin/.venv/bin/pip install -r twin/requirements-reconstruction.txt' >&2
   exit 2
@@ -17,14 +17,30 @@ if [[ ${1:-} == --boxes ]]; then
   exit 0
 fi
 if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo 'Usage: twin/build.sh <video.mp4> [alignment.json] | --boxes' >&2
+  echo 'Usage: twin/build.sh <video.mp4|frames-dir> [alignment.json] | --boxes' >&2
   exit 2
 fi
-video=$(realpath "$1")
-[[ -f "$video" ]] || { echo "Video not found: $video" >&2; exit 2; }
+input=$("$python" -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).expanduser().resolve())' "$1")
+video=""
+frames_source=""
+if [[ -d "$input" ]]; then
+  frames_source="$input"
+  "$python" - "$frames_source" <<'PY'
+import pathlib, sys
+images = [path for path in pathlib.Path(sys.argv[1]).iterdir()
+          if path.suffix.lower() in {'.jpg', '.jpeg', '.png'}]
+if not images:
+    raise SystemExit('Frame directory contains no JPG or PNG images')
+PY
+elif [[ -f "$input" ]]; then
+  video="$input"
+else
+  echo "Video or frame directory not found: $input" >&2
+  exit 2
+fi
 alignment=${2:-${TWIN_ALIGNMENT:-}}
 if [[ -n "$alignment" ]]; then
-  alignment=$(realpath "$alignment")
+  alignment=$("$python" -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).expanduser().resolve())' "$alignment")
   [[ -f "$alignment" ]] || { echo "Alignment not found: $alignment" >&2; exit 2; }
 fi
 cd "$root"
@@ -66,10 +82,37 @@ NEXT
 }
 
 pipeline() {
-  "$python" -m twin.extract_frames "$video" --out "$work/frames" \
-    --fps "${TWIN_FPS:-2}" --max-frames "${TWIN_MAX_FRAMES:-160}" \
-    --max-width "${TWIN_MAX_WIDTH:-1600}" --blur-threshold "${TWIN_BLUR_THRESHOLD:-50}" || return
-  bash twin/reconstruct.sh "$work/frames" "$work/colmap" || return
+  if [[ -n "$frames_source" ]]; then
+    ln -s "$frames_source" "$work/frames" || return
+    "$python" - "$frames_source" "$work/frames.json" <<'PY' || return
+import json, pathlib, sys
+frames_dir = pathlib.Path(sys.argv[1])
+paths = sorted(path for path in frames_dir.iterdir()
+               if path.suffix.lower() in {'.jpg', '.jpeg', '.png'})
+record_path = frames_dir.parent / 'record.json'
+record = json.loads(record_path.read_text()) if record_path.is_file() else {}
+interval = record.get('record_every_s')
+report = {
+    'input': record.get('source', str(frames_dir)),
+    'fps': None,
+    'sample_fps': 1 / interval if interval else None,
+    'duration_s': record.get('duration_s'),
+    'max_width': None,
+    'frame_count': len(paths),
+    'sampled_count': len(paths),
+    'blur_threshold': None,
+    'rejected_count': 0,
+    'frames': [{'name': path.name, 'accepted': True} for path in paths],
+    'video_uploaded': False,
+}
+pathlib.Path(sys.argv[2]).write_text(json.dumps(report, indent=2) + '\n')
+PY
+  else
+    "$python" -m twin.extract_frames "$video" --out "$work/frames" \
+      --fps "${TWIN_FPS:-2}" --max-frames "${TWIN_MAX_FRAMES:-160}" \
+      --max-width "${TWIN_MAX_WIDTH:-1600}" --blur-threshold "${TWIN_BLUR_THRESHOLD:-50}" || return
+  fi
+  PYTHON="$python" bash twin/reconstruct.sh "$work/frames" "$work/colmap" || return
   local anchor_args=(--model "$work/colmap/model" --images "$work/frames")
   if [[ -n "$alignment" ]]; then anchor_args=(--alignment "$alignment"); fi
   "$python" -m twin.anchor "$work/colmap/raw.ply" "${anchor_args[@]}" --out "$work/anchored.npy" || return

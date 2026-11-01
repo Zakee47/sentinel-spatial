@@ -4,14 +4,28 @@ root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 python=${PYTHON:-"$root/.venv/bin/python"}
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
-  echo 'Usage: scripts/drone_twin.sh <clip.mp4> [survey.json]' >&2
+  echo 'Usage: scripts/drone_twin.sh <clip.mp4|frames-dir> [survey.json]' >&2
   exit 2
 fi
-clip=$(realpath "$1")
-[[ -f "$clip" ]] || { echo "Clip not found: $clip" >&2; exit 2; }
+capture=$("$python" -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).expanduser().resolve())' "$1")
+if [[ -d "$capture" ]]; then
+  "$python" - "$capture" <<'PY'
+import pathlib, sys
+images = [path for path in pathlib.Path(sys.argv[1]).iterdir()
+          if path.suffix.lower() in {'.jpg', '.jpeg', '.png'}]
+if not images:
+    raise SystemExit(f"Frame directory contains no JPG or PNG images: {sys.argv[1]}")
+PY
+  depth_input="$capture"
+elif [[ -f "$capture" ]]; then
+  depth_input="$capture"
+else
+  echo "Clip or frame directory not found: $capture" >&2
+  exit 2
+fi
 survey=${2:-}
 if [[ -n "$survey" ]]; then
-  survey=$(realpath "$survey")
+  survey=$("$python" -c 'import pathlib,sys; print(pathlib.Path(sys.argv[1]).expanduser().resolve())' "$survey")
   [[ -f "$survey" ]] || { echo "Survey not found: $survey" >&2; exit 2; }
 fi
 
@@ -22,9 +36,9 @@ start=$SECONDS
 cd "$root"
 
 if [[ -n "$survey" ]]; then
-  PYTHON="$python" TWIN_OUT_DIR="$out" bash twin/build.sh "$clip" "$survey"
+  PYTHON="$python" TWIN_OUT_DIR="$out" bash twin/build.sh "$capture" "$survey"
 else
-  PYTHON="$python" TWIN_OUT_DIR="$out" bash twin/build.sh "$clip"
+  PYTHON="$python" TWIN_OUT_DIR="$out" bash twin/build.sh "$capture"
 fi
 
 meta="$out/twin.json"
@@ -51,11 +65,11 @@ if [[ "$source" == colmap && -s "$workspace/T_twin_colmap_final.json" ]]; then
     mkdir -p "$depth_tmp" "$depth_work"
     depth_args=(--out "$depth_tmp" --work "$depth_work" --max-frames "${DRONE_TWIN_DEPTH_FRAMES:-3}"
       --max-width "${DRONE_TWIN_DEPTH_WIDTH:-640}" --stride "${DRONE_TWIN_DEPTH_STRIDE:-3}")
-    "$python" -m depth.video_depth "$clip" --no-colmap "${depth_args[@]}"
+    "$python" -m depth.video_depth "$depth_input" --no-colmap "${depth_args[@]}"
   fi
 else
   echo 'No successful COLMAP metric alignment; publishing depth with assumed_camera_pose.' >&2
-  "$python" -m depth.video_depth "$clip" --no-colmap "${depth_args[@]}"
+  "$python" -m depth.video_depth "$depth_input" --no-colmap "${depth_args[@]}"
 fi
 
 "$python" - "$meta" "$depth_tmp/depth.json" "$depth_mode" <<'PY'

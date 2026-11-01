@@ -14,6 +14,7 @@ import mss
 import numpy as np
 
 from drone.driver import DroneDriver, Frame, NotSupported, Telemetry
+from drone.source import safe_source
 
 _SCREEN_REGION = re.compile(r"^\s*(-?\d+)\s*,\s*(-?\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*$")
 _NETWORK_PREFIXES = ("rtmp://", "rtsp://", "http://", "https://", "srt://")
@@ -182,7 +183,7 @@ class LiveFeedDriver(DroneDriver):
             self._capture_source, int
         ) or self._network_source
         self.feed_url = (
-            source
+            safe_source(source)
             if source.lower().startswith(("rtmp://", "http://", "https://"))
             else None
         )

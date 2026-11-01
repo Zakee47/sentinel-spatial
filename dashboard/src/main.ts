@@ -18,6 +18,7 @@ const store = new Store();
 let products: Product[] = [], scene: TwinScene | undefined, connected = false, demo = false;
 let rows: ReplayRow[] = [], cursor = 0, elapsed = 0, playing = true, speed = 1, duration = 60, reconnect: ReturnType<typeof setTimeout>;
 let runs: AgentRun[] = [], reviews: SentinelEvent[] = [];
+let lastTwinSignature: string | undefined;
 const reviewed = new Set<string>();
 let lastTick = performance.now();
 
@@ -42,7 +43,7 @@ $('app').innerHTML = `
       <aside class="right-column">
         <section class="drone-card panel" id="drone-panel"><div class="section-top"><p class="eyebrow">EYES IN THE AISLE</p><span class="tiny-tag" id="drone-mode">MODE UNKNOWN</span></div><h2>Drone–01 <span class="drone-state" id="drone-state">Standby</span></h2>
           <div class="drone-preview" id="drone-preview"><div class="preview-grid"></div><div class="drone-reticle">${icon('scan-line')}</div><span class="feed-label">DJI NEO 2 / <span id="feed-status">NO LIVE FEED</span></span><span class="feed-coordinate" id="drone-coordinates">X 5.0 / Y 5.0 / Z 0.0</span><img id="drone-feed" alt="Drone live feed" hidden/></div>
-          <div class="drone-details"><span>${icon('battery')} <b id="battery">—</b></span><span>${icon('crosshair')} <b id="current-bay">Home</b></span></div><p id="last-decision" class="decision-note">Waiting for a bay inspection. Safety supervisor always has final say.</p>
+          <div class="drone-details"><span>${icon('battery')} <b id="battery">—</b></span><span>${icon('crosshair')} <b id="current-bay">Home</b></span></div><p id="last-decision" class="decision-note">Waiting for a bay inspection. Safety supervisor always has final say.</p><small class="twin-build-status" id="twin-build-status" hidden></small>
           <div class="drone-actions"><button class="button" id="mission">${icon('bot')} Launch Devin mission ${icon('arrow-up-right')}</button><button class="stop-button" id="stop" title="Request safe landing">${icon('square')} STOP</button></div>
           <p class="safety-note">Geofence on · ≤ 1 m/s · ≤ 4 m · local flight loop</p><div id="agent-runs" class="agent-runs"></div>
         </section>
@@ -130,6 +131,9 @@ function renderDrone(d: DroneState) {
   $('battery').textContent = `${d.battery_pct.toFixed(0)}%`; $('current-bay').textContent = human(d.current_bay ?? 'Home');
   $('drone-coordinates').textContent = `X ${d.x.toFixed(1)} / Y ${d.y.toFixed(1)} / Z ${d.z.toFixed(1)} M`;
   $('last-decision').textContent = d.last_decision ? `Decisions API → ${answerText(d.last_decision)}` : 'Waiting for a bay inspection. Safety supervisor always has final say.';
+  const twinBuild = $('twin-build-status');
+  twinBuild.hidden = !d.twin_build;
+  twinBuild.textContent = d.twin_build ? `Twin build · ${d.twin_build}` : '';
   const feed = $('drone-feed') as HTMLImageElement, url = safeUrl(d.feed_url);
   if (url && feed.src !== url) feed.src = url; feed.hidden = !url; $('feed-status').textContent = url ? 'LIVE FEED' : 'NO LIVE FEED';
 }
@@ -148,6 +152,18 @@ async function loadReplay(url: string, fallback = false) {
 function drain() { while (cursor < rows.length && rows[cursor].t <= elapsed) store.ingest(rows[cursor++].msg); }
 function seek(time: number) { elapsed = time; store.reset(); cursor = 0; drain(); render(); }
 function clock(value: number) { return `${Math.floor(value / 60).toString().padStart(2, '0')}:${Math.floor(value % 60).toString().padStart(2, '0')}`; }
+async function pollTwinAssets() {
+  try {
+    const response = await fetch(`${base}twin/out/twin.json?poll=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) return;
+    const metadata = await response.json() as Record<string, unknown>;
+    const signature = String(metadata.generated_at ?? JSON.stringify(metadata));
+    if (lastTwinSignature !== undefined && signature !== lastTwinSignature) {
+      await scene?.reloadTwinAssets();
+    }
+    lastTwinSignature = signature;
+  } catch { /* Twin refresh is optional; keep the most recently loaded assets. */ }
+}
 function tick(now: number) {
   if (rows.length) {
     if (playing) { const before = cursor; elapsed = Math.min(duration, elapsed + (now - lastTick) / 1000 * speed); drain(); if (before !== cursor) render(); if (elapsed >= duration) { playing = false; updatePlay(); } }
@@ -176,7 +192,13 @@ async function boot() {
     try { scene = new TwinScene($('scene'), site, store); } catch { notice('WebGL is unavailable. Event intelligence and controls still work.'); }
     if (replayUrl) await loadReplay(replayUrl);
     else if (demo) { notice('Backend not connected. Showing a labelled local simulation. Launch and STOP are disabled.'); await loadReplay('demo.jsonl', true); }
-    else { await hydrate(); websocket(); setInterval(() => { if (connected) void refreshPanels(); }, 5000); }
+    else {
+      await hydrate(); websocket(); setInterval(() => { if (connected) void refreshPanels(); }, 5000);
+      if (!replayUrl && ['localhost', '127.0.0.1', '::1'].includes(location.hostname)) {
+        void pollTwinAssets();
+        setInterval(() => void pollTwinAssets(), 10_000);
+      }
+    }
     render(); requestAnimationFrame(tick);
   } catch (e) { notice(`Could not load Sentinel: ${(e as Error).message}. Check the replay URL or API connection.`); setStatus('Connection error'); }
 }

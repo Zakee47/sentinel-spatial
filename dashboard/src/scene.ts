@@ -222,12 +222,35 @@ export class TwinScene {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     return new THREE.Points(geometry, new THREE.PointsMaterial({ size, vertexColors: true }));
   }
-  private async loadDepth() {
+  async reloadTwinAssets() {
+    this.clearAssetGroup(this.boxTwin);
+    this.clearAssetGroup(this.colmapTwin);
+    this.clearAssetGroup(this.depth);
+    const version = String(Date.now());
+    await Promise.all([this.loadTwin(version), this.loadDepth(version)]);
+  }
+  private clearAssetGroup(group: THREE.Group) {
+    while (group.children.length) {
+      const child = group.children[0];
+      child.traverse(object => {
+        if (!(object instanceof THREE.Mesh || object instanceof THREE.Points)) return;
+        object.geometry.dispose();
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        for (const material of materials) {
+          (material as THREE.Material & { map?: THREE.Texture }).map?.dispose();
+          material.dispose();
+        }
+      });
+      group.remove(child);
+    }
+  }
+  private async loadDepth(version = '') {
     try {
-      const response = await fetch(`${import.meta.env.BASE_URL}depth/out/depth_points.bin`);
+      const suffix = version ? `?refresh=${version}` : '';
+      const response = await fetch(`${import.meta.env.BASE_URL}depth/out/depth_points.bin${suffix}`);
       if (!response.ok || response.headers.get('content-type')?.includes('text/html')) return;
       this.depth.add(this.cloud(await response.arrayBuffer(), .035));
-      const metadata: { registration?: string } = await fetch(`${import.meta.env.BASE_URL}depth/out/depth.json`).then(result => result.ok ? result.json() : {});
+      const metadata: { registration?: string } = await fetch(`${import.meta.env.BASE_URL}depth/out/depth.json${suffix}`).then(result => result.ok ? result.json() : {});
       const toggle = document.querySelector<HTMLInputElement>('#depth-toggle');
       const registration = metadata.registration ?? 'unregistered';
       if (toggle) {
@@ -261,13 +284,14 @@ export class TwinScene {
     }
     for (const p of this.store.heatmap.points.slice(-50)) { const dot = new THREE.Mesh(new THREE.SphereGeometry(.025, 6, 4), new THREE.MeshBasicMaterial({ color: BLUE })); dot.position.copy(vec(p[0], p[1] - .055, p[2])); this.people.add(dot); }
   }
-  private async loadTwin() {
+  private async loadTwin(version = '') {
     const base = import.meta.env.BASE_URL;
     try {
-      const res = await fetch(`${base}twin/out/twin.json`); if (!res.ok || !res.headers.get('content-type')?.includes('json')) return;
+      const suffix = version ? `?refresh=${version}` : '';
+      const res = await fetch(`${base}twin/out/twin.json${suffix}`); if (!res.ok || !res.headers.get('content-type')?.includes('json')) return;
       const info = await res.json();
       if (info.source === 'colmap' && info.point_count > 0) {
-        const binary = await fetch(`${base}twin/out/twin_points.bin`); if (!binary.ok) throw new Error('Point cloud missing');
+        const binary = await fetch(`${base}twin/out/twin_points.bin${suffix}`); if (!binary.ok) throw new Error('Point cloud missing');
         const cloud = this.cloud(await binary.arrayBuffer(), .025);
         cloud.rotation.x = -Math.PI / 2;
         this.colmapTwin.add(cloud);
@@ -279,7 +303,7 @@ export class TwinScene {
         this.source = info.metric_registration === false ? 'COLMAP · example alignment' : 'COLMAP cloud';
       } else {
         try {
-          const gltf = await new GLTFLoader().loadAsync(`${base}twin/out/scene.glb`);
+          const gltf = await new GLTFLoader().loadAsync(`${base}twin/out/scene.glb${suffix}`);
           gltf.scene.rotation.x = -Math.PI / 2; this.boxTwin.add(gltf.scene);
         } catch { /* Keep the procedural box twin if its mesh asset is absent. */ }
         const boxToggle = document.querySelector<HTMLInputElement>('#box-toggle');
@@ -290,6 +314,9 @@ export class TwinScene {
         this.source = info.source === 'boxes' ? 'Box twin · unregistered' : 'Box twin';
       }
       document.querySelector('#twin-source')!.textContent = this.source;
-    } catch { /* Keep the metric fallback if optional twin assets are unavailable. */ }
+    } catch {
+      this.toggleTwin('box');
+      document.querySelector('#twin-source')!.textContent = this.source;
+    }
   }
 }
