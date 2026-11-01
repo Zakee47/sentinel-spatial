@@ -57,6 +57,32 @@ MediaMTX listens for RTMP on TCP 1935. A local synthetic stream can test the
 pipeline without the drone: run `bash drone/scripts/test_pattern.sh` after
 starting the server.
 
+### B2. RTMP when the phone's Wi-Fi is taken by the drone (phone-only mode)
+
+From W7's REA of DJI Fly: DJI Fly has built-in RTMP live streaming, but when the Neo 2 flies
+**without the RC-N3**, the phone's Wi-Fi is connected to the drone, so the RTMP push leaves over
+**cellular** and cannot reach `192.168.x.x` on the laptop. Options, fastest first:
+
+1. **Use scrcpy instead (A).** USB mirroring works in both modes and needs no network. Recommended.
+2. **Fly with the RC-N3**: the phone talks to the controller over USB, so its Wi-Fi is free to join
+   the laptop's LAN; then B works as written with `rtmp://<laptop-ip>:1935/live/neo`.
+3. **Public TCP tunnel to the laptop's MediaMTX** (ngrok; needs a free account, TCP endpoints may ask
+   for card verification):
+   ```bash
+   bash drone/scripts/rtmp_server.sh            # terminal 1
+   ngrok tcp 1935                               # terminal 2 -> "Forwarding tcp://0.tcp.eu.ngrok.io:14321"
+   # DJI Fly RTMP URL:  rtmp://0.tcp.eu.ngrok.io:14321/live/neo
+   python -m drone.run --mode live --source rtmp://localhost:1935/live/neo
+   ```
+   A `cloudflared` quick tunnel does **not** work here: Cloudflare TCP tunnels need `cloudflared` on
+   the *client* (the phone) too, and quick tunnels are HTTP only.
+4. **Cloud relay**: run MediaMTX on any public VM (e.g. `docker run --rm -p 1935:1935
+   bluenviron/mediamtx`), point DJI Fly at `rtmp://<vm-ip>:1935/live/neo`, and pull it on the laptop
+   with `--source rtmp://<vm-ip>:1935/live/neo`. Adds a cellular round trip of latency.
+
+Measured locally (test pattern -> MediaMTX -> `LiveFeedDriver`): first frame after ~6 s (OpenCV
+stream probing), then a steady 10 fps.
+
 ## C. Crop the DJI Fly controls out of the image
 
 `LiveFeedDriver` and `preview.py --crop` accept `x,y,w,h`. If all four values
