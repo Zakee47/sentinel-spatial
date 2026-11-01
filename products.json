@@ -1,0 +1,162 @@
+[
+  {
+    "product_id": "SKU-001",
+    "name": "Oat milk, original",
+    "brand": "Fieldwork",
+    "barcode": "5000000000001",
+    "price_gbp": 1.8,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-002",
+    "name": "Almond milk",
+    "brand": "Common Good",
+    "barcode": "5000000000002",
+    "price_gbp": 2.01,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-003",
+    "name": "Barista oat",
+    "brand": "Daily",
+    "barcode": "5000000000003",
+    "price_gbp": 2.22,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-004",
+    "name": "Whole milk",
+    "brand": "Fieldwork",
+    "barcode": "5000000000004",
+    "price_gbp": 2.43,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-005",
+    "name": "Soy drink",
+    "brand": "Common Good",
+    "barcode": "5000000000005",
+    "price_gbp": 2.64,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-006",
+    "name": "Organic granola",
+    "brand": "Daily",
+    "barcode": "5000000000006",
+    "price_gbp": 2.85,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-007",
+    "name": "Cocoa oat bar",
+    "brand": "Fieldwork",
+    "barcode": "5000000000007",
+    "price_gbp": 3.06,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-008",
+    "name": "Wildflower honey",
+    "brand": "Common Good",
+    "barcode": "5000000000008",
+    "price_gbp": 3.27,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-009",
+    "name": "Almond butter",
+    "brand": "Daily",
+    "barcode": "5000000000009",
+    "price_gbp": 3.48,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-010",
+    "name": "Breakfast oats",
+    "brand": "Fieldwork",
+    "barcode": "5000000000010",
+    "price_gbp": 3.69,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-011",
+    "name": "Sparkling water",
+    "brand": "Common Good",
+    "barcode": "5000000000011",
+    "price_gbp": 3.9,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-012",
+    "name": "Cold brew coffee",
+    "brand": "Daily",
+    "barcode": "5000000000012",
+    "price_gbp": 4.11,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-013",
+    "name": "Green tea",
+    "brand": "Fieldwork",
+    "barcode": "5000000000013",
+    "price_gbp": 4.32,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-014",
+    "name": "Apple juice",
+    "brand": "Common Good",
+    "barcode": "5000000000014",
+    "price_gbp": 4.53,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-015",
+    "name": "Ginger shot",
+    "brand": "Daily",
+    "barcode": "5000000000015",
+    "price_gbp": 4.74,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-016",
+    "name": "Sea salt crisps",
+    "brand": "Fieldwork",
+    "barcode": "5000000000016",
+    "price_gbp": 4.95,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-017",
+    "name": "Roasted almonds",
+    "brand": "Common Good",
+    "barcode": "5000000000017",
+    "price_gbp": 5.16,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-018",
+    "name": "Dark chocolate",
+    "brand": "Daily",
+    "barcode": "5000000000018",
+    "price_gbp": 5.37,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-019",
+    "name": "Trail mix",
+    "brand": "Fieldwork",
+    "barcode": "5000000000019",
+    "price_gbp": 5.58,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-020",
+    "name": "Protein bar",
+    "brand": "Common Good",
+    "barcode": "5000000000020",
+    "price_gbp": 5.79,
+    "zone_id": "aisle-A-shelf-4"
+  }
+]
