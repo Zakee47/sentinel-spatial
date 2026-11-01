@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "name": "reach_outcome",
+  "type": "choice",
+  "input_text": "Image 1: shelf crop before the reach. Image 2: shelf crop after the shopper left the zone. Image 3: crop of the shopper's hand as they left. Faces are blurred.",
+  "instructions": "What happened to the product the shopper reached for?",
+  "choices": [
+    {
+      "value": "in_basket",
+      "description": "Product is in a basket, bag or trolley, or carried away from the shelf."
+    },
+    {
+      "value": "back_on_shelf",
+      "description": "Product was returned to the shelf; the shelf after looks like the shelf before."
+    },
+    {
+      "value": "still_holding",
+      "description": "Shopper is still holding the product at the shelf."
+    },
+    {
+      "value": "unclear",
+      "description": "Cannot tell from these images."
+    }
+  ]
+}

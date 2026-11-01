@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "name": "drone_next_action",
+  "type": "choice",
+  "input_text": "Photo from the patrol drone at its current bay stop, plus the patrol state as JSON. This is advisory: a code safety supervisor validates every action against geofence, battery and people-distance limits before the flight loop executes it.",
+  "instructions": "What should the patrol do next after this bay stop?",
+  "choices": [
+    {
+      "value": "next_bay",
+      "description": "This bay was inspected clearly and no follow-up is needed; continue to the next planned bay."
+    },
+    {
+      "value": "move_closer",
+      "description": "The bay is too far, small or partly out of frame to judge; approach within the standoff limit."
+    },
+    {
+      "value": "rescan",
+      "description": "The image is blurred, dark or obstructed; hold and capture again."
+    },
+    {
+      "value": "flag_and_continue",
+      "description": "An issue is visible and clear enough to report; flag it and continue the patrol."
+    },
+    {
+      "value": "return_home",
+      "description": "Patrol is complete, battery is near its minimum, or the mission was stopped; return to home."
+    },
+    {
+      "value": "abort",
+      "description": "A person is close to the drone, the view shows an unsafe situation, or the state is inconsistent; abort and land safely."
+    }
+  ]
+}

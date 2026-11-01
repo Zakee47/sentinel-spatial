@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "name": "engagement_level",
+  "type": "score",
+  "input_text": "A short sequence of crops of one shopper at a shelf, in time order. Faces are blurred.",
+  "instructions": "How engaged is this shopper with the products on this shelf?",
+  "levels": [
+    {
+      "label": "passing",
+      "description": "Walking past without slowing or looking at the shelf."
+    },
+    {
+      "label": "glancing",
+      "description": "Looks at the shelf briefly while moving; no stop."
+    },
+    {
+      "label": "browsing",
+      "description": "Stops at the shelf and scans products, may touch one."
+    },
+    {
+      "label": "comparing",
+      "description": "Holds or inspects two or more products, reads labels or compares them."
+    }
+  ]
+}
