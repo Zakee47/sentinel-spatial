@@ -29,20 +29,14 @@ def generate(site: dict[str, Any], out: Path, spacing: float = 0.045) -> dict[st
         objects.append({"name": name, "bounds_min": lo, "bounds_max": hi})
         for axis in range(3):
             a, b = [i for i in range(3) if i != axis]
-            u = np.linspace(
-                lower[a], upper[a], max(2, int((upper[a] - lower[a]) / spacing) + 1)
-            )
-            v = np.linspace(
-                lower[b], upper[b], max(2, int((upper[b] - lower[b]) / spacing) + 1)
-            )
+            u = np.linspace(lower[a], upper[a], max(2, int((upper[a] - lower[a]) / spacing) + 1))
+            v = np.linspace(lower[b], upper[b], max(2, int((upper[b] - lower[b]) / spacing) + 1))
             uu, vv = np.meshgrid(u, v)
             for side in (lower[axis], upper[axis]):
                 xyz = np.empty((uu.size, 3))
                 xyz[:, axis], xyz[:, a], xyz[:, b] = side, uu.ravel(), vv.ravel()
                 # Slight deterministic shading keeps the point cloud readable.
-                colour = np.tile(
-                    np.asarray(rgb) / 255 * (0.83 + axis * 0.07), (len(xyz), 1)
-                )
+                colour = np.tile(np.asarray(rgb) / 255 * (0.83 + axis * 0.07), (len(xyz), 1))
                 samples.append(np.column_stack((xyz, colour)))
 
     polygons = np.concatenate([z["polygon_xy"] for z in site["zones"]])
@@ -115,9 +109,7 @@ def generate(site: dict[str, Any], out: Path, spacing: float = 0.045) -> dict[st
                     x = x0 + 0.18 + col * (x1 - x0 - 0.32) / 3
                     misplaced = name == "bay-B-03" and level == 0 and col == 1
                     colour = [214, 75, 77] if misplaced else [181, 146, 99]
-                    carton = f"{name}-carton-{level}-{col}" + (
-                        "-misplaced" if misplaced else ""
-                    )
+                    carton = f"{name}-carton-{level}-{col}" + ("-misplaced" if misplaced else "")
                     box(
                         carton,
                         [x, y0 + 0.16, h + 0.13],
@@ -142,7 +134,7 @@ def generate(site: dict[str, Any], out: Path, spacing: float = 0.045) -> dict[st
             "up_axis": "Z",
             "site_id": site["site_id"],
             "synthetic": True,
-            "colour_encoding": "linear RGB normalized 0..1",
+            "colour_encoding": "sRGB normalized 0..1",
             "objects": objects,
             "planted_issues": [
                 {"zone_id": "bay-B-02", "issue": "empty", "level": 0, "column": 1},

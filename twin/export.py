@@ -40,9 +40,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("input", type=Path)
     parser.add_argument("--out", type=Path, default=Path("twin/out"))
-    parser.add_argument(
-        "--source", choices=["boxes", "colmap", "simready"], default="colmap"
-    )
+    parser.add_argument("--source", choices=["boxes", "colmap", "simready"], default="colmap")
     parser.add_argument("--voxel-m", type=float, default=0.035)
     parser.add_argument("--max-points", type=int, default=300_000)
     args = parser.parse_args()

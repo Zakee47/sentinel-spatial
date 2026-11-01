@@ -21,9 +21,7 @@ def validate(points: Cloud) -> Cloud:
     return points
 
 
-def downsample(
-    points: Cloud, voxel_m: float = 0.035, max_points: int = 300_000
-) -> Cloud:
+def downsample(points: Cloud, voxel_m: float = 0.035, max_points: int = 300_000) -> Cloud:
     points = validate(points)
     if voxel_m <= 0 or not 1 <= max_points <= 300_000:
         raise ValueError("voxel_m must be positive; max_points must be in [1,300000]")
@@ -43,8 +41,7 @@ def downsample(
 def write_ply(path: Path, points: Cloud) -> None:
     points = validate(points)
     dtype = np.dtype(
-        [(v, "<f4") for v in ("x", "y", "z")]
-        + [(v, "u1") for v in ("red", "green", "blue")]
+        [(v, "<f4") for v in ("x", "y", "z")] + [(v, "u1") for v in ("red", "green", "blue")]
     )
     data = np.empty(len(points), dtype=dtype)
     for i, key in enumerate(dtype.names or ()):
@@ -68,8 +65,14 @@ def read_cloud(path: Path) -> Cloud:
     import trimesh
 
     cloud = trimesh.load(path, process=False)
-    xyz = np.asarray(cloud.vertices)
-    rgba = np.asarray(
-        cloud.colors if hasattr(cloud, "colors") else cloud.visual.vertex_colors
-    )
+    if isinstance(cloud, trimesh.points.PointCloud):
+        xyz = np.asarray(cloud.vertices)
+        rgba = np.asarray(cloud.colors)
+    elif isinstance(cloud, trimesh.Trimesh):
+        xyz = np.asarray(cloud.vertices)
+        if not isinstance(cloud.visual, trimesh.visual.ColorVisuals):
+            raise TypeError("PLY mesh must have vertex colours")
+        rgba = np.asarray(cloud.visual.vertex_colors)
+    else:
+        raise TypeError("Expected a PLY point cloud or mesh, not a scene")
     return validate(np.column_stack((xyz, rgba[:, :3] / 255.0)))

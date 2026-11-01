@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import matplotlib
@@ -20,6 +21,10 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=Path("twin/out/preview.png"))
     args = parser.parse_args()
     points = read_cloud(args.input)
+    count = len(points)
+    metadata_path = args.input.parent / "twin.json"
+    metadata = json.loads(metadata_path.read_text()) if metadata_path.exists() else {}
+    synthetic = metadata.get("source") == "boxes"
     points = points[:: max(1, len(points) // 100_000)]
     fig = plt.figure(figsize=(16, 10), facecolor="#0e1720")
     ax = fig.add_subplot(111, projection="3d", facecolor="#0e1720")
@@ -32,7 +37,7 @@ def main() -> None:
         rasterized=True,
     )
     ax.view_init(elev=28, azim=-63)
-    ax.set_box_aspect((11, 10.2, 4.1))
+    ax.set_box_aspect(np.maximum(np.ptp(points[:, :3], axis=0), 0.1))
     ax.set(xlabel="X / metres", ylabel="Y / metres", zlabel="Z / metres")
     ax.tick_params(colors="#a6b8c6", labelsize=8)
     for axis in (ax.xaxis, ax.yaxis, ax.zaxis):
@@ -49,15 +54,20 @@ def main() -> None:
     fig.text(
         0.07,
         0.89,
-        "PROCEDURAL FALLBACK  •  Z-UP  •  METRES  •  NO CAPTURED VIDEO",
+        ("PROCEDURAL FALLBACK  •  NO CAPTURED VIDEO" if synthetic else "COLMAP RECONSTRUCTION")
+        + "  •  Z-UP  •  METRES",
         color="#76c7be",
         size=11,
     )
     fig.text(
         0.07,
         0.07,
-        "Retail: 4 sections / 20 SKUs     Racking: 4 bays / 3 levels\n"
-        "B-02: empty lower centre pick face     B-03: misplaced red carton",
+        (
+            "Retail: 4 sections / 20 SKUs     Racking: 4 bays / 3 levels\n"
+            "B-02: empty lower centre pick face     B-03: misplaced red carton"
+        )
+        if synthetic
+        else f"{count:,} reconstructed points / metric alignment / floor Z = 0",
         color="#b3c6d4",
         size=12,
         linespacing=1.6,
