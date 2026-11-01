@@ -1,0 +1,7 @@
+work/
+*.mp4
+*.mov
+*.npy
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
