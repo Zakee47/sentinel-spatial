@@ -1,0 +1,36 @@
+{
+  "verdict": "not_feasible_direct_control",
+  "verdict_summary": "No legitimate code-control path for the DJI Neo 2: DJI Fly drives it through a private, per-product native stack (ilink transport, per-product protobuf libs, internal UAV key-value SDK) and MSDK v5 does not support the Neo series. Live video IS available via DJI Fly's official RTMP live streaming.",
+  "apk": {"app": "DJI Fly", "package": "dji.go.v5", "version": "1.21.18", "version_code": 3132440, "sha256": "a4d0bcfb6be9731bcc07dc66b67a3492c770ceda9d0fa94ec247df2889be8a0d", "source": "https://www.dji.com/downloads/djiapp/dji-fly"},
+  "video_paths": [
+    {"name": "DJI Fly RTMP live streaming", "official": true, "live": true, "how": "DJI Fly > ... > Transmission > Live Streaming Platforms > RTMP > rtmp://<laptop>:1935/live/neo2", "notes": "Pushed over the phone's internet: 4G/5G in Wi-Fi mode; LAN Wi-Fi when using RC-N3 over USB. ~1-3 s latency.", "evidence": ["libmrtc_rtmp.so", "libsdk_liveshare_core.so", "com/uav/livestream/LiveStreamSession", "com/uav/livestream/core/video/LiveStreamVideoEncoder"]},
+    {"name": "Phone screen mirror (scrcpy over USB / capture)", "official": false, "live": true, "how": "scrcpy --no-audio --record or v4l2 sink on the laptop", "notes": "Fallback; no DJI feature involved."},
+    {"name": "Wi-Fi fast transfer of recorded media", "official": true, "live": false, "how": "DJI Fly QuickTransfer after landing", "notes": "4K footage for COLMAP twin capture.", "evidence": ["com.uav.service.wififast.ui.activity.WiFiFastGuideActivity"]}
+  ],
+  "control_path_summary": "On-screen virtual sticks (MviVirtualStickView) or the RC-N3 feed an internal key-value UAV SDK (KeySendVirtualStickFlightControlData, KeyVirtualStickControlModeEnabled), serialised by per-product proto libraries (libwab*_proto.so etc.) over DJI's ilink transport (libilink2, libilink_network, libilink_protobuf) either directly over Wi-Fi to the drone (WifiControlConnectActivity) or over USB-AOA (DJIAoaActivity) to the RC-N3, which relays via O4/OcuSync (UAVOcuSyncKey). Video returns over the same link and is decoded natively (libuav_video_jni, libmtmd_h264streaming). No public MSDK (no dji.sdk classes). Flight safety limits are enforced on the aircraft.",
+  "recommended_integration": "Fly the Neo 2 manually (labelled piloted) and stream via DJI Fly RTMP into drone/LiveFeedDriver for Decisions API bay checks; run patrol autonomy in SimDriver with the code safety supervisor; Devin mission agent plans missions only. For real autonomy: Ryze Tello EDU (open Wi-Fi SDK) indoors, DJI Mini 4 Pro + MSDK v5 + RC-N3 as the product path.",
+  "msdk_v5_neo_support": {"supported": false, "source": "https://github.com/dji-sdk/Mobile-SDK-Android-V5/issues/725"},
+  "depth_data": {
+    "received_by_app": "processed_obstacle_distances",
+    "raw_depth_or_lidar_exposed": false,
+    "summary": "Neo 2 has omnidirectional monocular vision, forward LiDAR and downward infrared ToF. DJI Fly's shared native stack contains per-sector obstacle-distance types (bird-view 'radar' display, warnings) and flight-record obstacle/perception fields; no point cloud or depth map types were found. Neo 2 emission of each field is not verified at runtime.",
+    "official_exposure": ["Live-view obstacle warnings / radar display (UI only)", "Possibly fields in the encrypted FlightRecord, readable post-flight only via DJI's official parsing API key"],
+    "live_official_export": false,
+    "evidence": ["libdatajar.so: AllDirectionsObstacleDistanceInfoConverter", "libdatajar.so: OmniHorizontalRadarDistance / OmniUpRadarDistance / OmniDownRadarDistance", "libdatajar.so: ObstacleDetectionSector, ObstacleWarningMinDistance, obstacleDistanceInMeters", "libdatajar.so: BaseFlightOSDTopObstacleVisionShell", "libsdk_jni.so: perception_birdview_distance_push", "libfr_engine.so: FlightRecordEngine::UpdateObstacleDistances, EnablePerceptionGroupDataRecord", "libfr_std_cpp.so: PerceptionObstacleDistances, PerceptionState"],
+    "sentinel_alternative": "Depth from our own COLMAP twin plus monocular estimation on the RTMP video; MSDK v5 perception API on a Mini 4 Pro for real obstacle distances."
+  },
+  "key_evidence": [
+    {"kind": "manifest", "name": "com.dji.component.application.activity.DJIAoaActivity", "meaning": "RC-N3 attaches over USB Open Accessory"},
+    {"kind": "manifest", "name": "com.uav.service.wififast.ui.shield.WifiControlConnectActivity", "meaning": "Direct Wi-Fi control connection to the drone"},
+    {"kind": "native_lib", "name": "libilink2.so / libilink_network.so / libilink_protobuf.so", "meaning": "Private DJI link transport, protobuf-framed"},
+    {"kind": "native_lib", "name": "libwab*_proto.so (wab020..wab530), libacb20x_proto.so", "meaning": "Per-product protocol definitions"},
+    {"kind": "native_string", "name": "KeySendVirtualStickFlightControlData", "meaning": "Internal virtual-stick flight command key"},
+    {"kind": "native_string", "name": "uav/sdk/keyvalue/key/UAVOcuSyncKey", "meaning": "O4/OcuSync link keys in internal SDK"},
+    {"kind": "native_string", "name": "NEO2", "meaning": "Neo 2 is a product type in the shared stack"},
+    {"kind": "native_lib", "name": "libuav_video_jni.so / libmtmd_h264streaming.so", "meaning": "Native live-view decode"},
+    {"kind": "native_lib", "name": "libmrtc_rtmp.so + com/uav/livestream/LiveStreamSession", "meaning": "Official RTMP live streaming"},
+    {"kind": "rea_search", "name": "search-android-classes dji.sdk -> 0 matches", "meaning": "No public MSDK inside DJI Fly"},
+    {"kind": "native_lib", "name": "libflightrestrictcore.so", "meaning": "Geofence (GEO zone) handling - untouched"}
+  ],
+  "scope": "Owner's own drone/phone/app; interoperability analysis under UK law; names only; no firmware, no safety bypass, no decryption or auth circumvention, no DJI code redistributed."
+}
