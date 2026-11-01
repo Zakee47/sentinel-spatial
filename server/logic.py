@@ -126,7 +126,6 @@ def zone_rollup(funnel_rows: list[dict[str, Any]]) -> dict[str, dict[str, float]
         for k in z:
             z[k] += r[k]
     for z in zones.values():
-        z["conversion"] = (
-            round((z["kept"] + z["sold"]) / z["looked"], 3) if z["looked"] else 0.0
-        )
+        # observed in-store conversion: kept per look (till sales cover the whole day)
+        z["conversion"] = round(z["kept"] / z["looked"], 3) if z["looked"] else 0.0
     return zones
