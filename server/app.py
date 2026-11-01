@@ -596,8 +596,8 @@ async def answer(intent: str, question: str) -> dict[str, Any]:
             }
         worst_zone, wz = min(looked_zones.items(), key=lambda kv: kv[1]["conversion"])
         text = (
-            f"{worst_zone} underperformed: {int(wz['looked'])} looks but only {int(wz['kept'] + wz['sold'])} "
-            f"kept or sold (conversion {wz['conversion']:.0%})."
+            f"{worst_zone} underperformed: {int(wz['looked'])} looks but only {int(wz['kept'])} "
+            f"kept ({wz['conversion']:.0%} look-to-basket)."
         )
         if flagged:
             f = max(flagged, key=lambda r: r["looked"])
