@@ -1,0 +1,66 @@
+# Sentinel site configuration: the single source of truth for geometry and thresholds.
+# Twin frame: metres, right-handed, Z up, origin at portal P0, X along the main aisle.
+site_id: demo-warehouse
+units: metres
+floor_plane: [0.0, 0.0, 1.0, 0.0]          # ax+by+cz+d=0 (twin/ may refine this)
+
+portals:
+  - id: P0
+    size_m: 0.20
+    T_twin_portal: [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]
+  - id: P1                                  # on the retail shelf end, faces camera-1
+    size_m: 0.20
+    T_twin_portal: [1,0,0,0.5, 0,0,-1,2.0, 0,1,0,1.5, 0,0,0,1]
+  - id: P2                                  # rack end, for drone localisation
+    size_m: 0.30
+    T_twin_portal: [1,0,0,0.0, 0,0,-1,8.0, 0,1,0,1.5, 0,0,0,1]
+  - id: P3
+    size_m: 0.30
+    T_twin_portal: [1,0,0,10.0, 0,0,-1,8.0, 0,1,0,1.5, 0,0,0,1]
+
+cameras:
+  - id: camera-1                            # fixed CCTV, MOCKED with stock footage
+    kind: fixed
+    url: perception/footage/aisle.mp4       # file path or rtsp:// URL
+    intrinsics_file: calib/camera-1.yaml    # optional; perception falls back to an approximate pinhole
+    anchor_portal: P1
+    # Hand-set pose used when the footage has no portal in view (stock footage).
+    T_twin_cam_override: null
+    fps: 15
+  - id: drone-1                             # DJI Neo 2, LIVE feed (phone mirror / RTMP / capture card)
+    kind: drone
+    url: "0"                                # OpenCV source: device index, rtmp://, or file
+    fps: 10
+
+zones:
+  # Retail set: one shelving unit, 4 sections, 5 products each.
+  - {id: aisle-A-shelf-1, kind: retail_shelf, polygon_xy: [[1.0,2.0],[1.75,2.0],[1.75,2.4],[1.0,2.4]], z_range: [0.0, 1.8], products: [SKU-001, SKU-002, SKU-003, SKU-004, SKU-005]}
+  - {id: aisle-A-shelf-2, kind: retail_shelf, polygon_xy: [[1.75,2.0],[2.5,2.0],[2.5,2.4],[1.75,2.4]], z_range: [0.0, 1.8], products: [SKU-006, SKU-007, SKU-008, SKU-009, SKU-010]}
+  - {id: aisle-A-shelf-3, kind: retail_shelf, polygon_xy: [[2.5,2.0],[3.25,2.0],[3.25,2.4],[2.5,2.4]], z_range: [0.0, 1.8], products: [SKU-011, SKU-012, SKU-013, SKU-014, SKU-015]}
+  - {id: aisle-A-shelf-4, kind: retail_shelf, polygon_xy: [[3.25,2.0],[4.0,2.0],[4.0,2.4],[3.25,2.4]], z_range: [0.0, 1.8], products: [SKU-016, SKU-017, SKU-018, SKU-019, SKU-020]}
+  - {id: aisle-A-floor, kind: aisle_floor, polygon_xy: [[0.5,0.5],[4.5,0.5],[4.5,2.0],[0.5,2.0]], z_range: [0.0, 2.2]}
+  # Racking: 4 bays for the drone patrol (one planted empty pick face, one misplaced carton).
+  - {id: bay-B-01, kind: rack_bay, polygon_xy: [[0.0,8.0],[2.5,8.0],[2.5,9.2],[0.0,9.2]], z_range: [0.0, 4.0], reference_image: refs/bay-B-01.jpg}
+  - {id: bay-B-02, kind: rack_bay, polygon_xy: [[2.5,8.0],[5.0,8.0],[5.0,9.2],[2.5,9.2]], z_range: [0.0, 4.0], reference_image: refs/bay-B-02.jpg}
+  - {id: bay-B-03, kind: rack_bay, polygon_xy: [[5.0,8.0],[7.5,8.0],[7.5,9.2],[5.0,9.2]], z_range: [0.0, 4.0], reference_image: refs/bay-B-03.jpg}
+  - {id: bay-B-04, kind: rack_bay, polygon_xy: [[7.5,8.0],[10.0,8.0],[10.0,9.2],[7.5,9.2]], z_range: [0.0, 4.0], reference_image: refs/bay-B-04.jpg}
+
+thresholds:
+  look_min_s: 1.5
+  interest_min_s: 5.0
+  gaze_half_angle_deg: 10
+  holding_product: {auto: 0.85, review: 0.55}
+  reach_outcome:   {auto: 0.80, review: 0.50}
+  bay_issue:       {auto: 0.85, review: 0.55}
+  decision_timeout_s: 2.0
+
+drone:
+  home_xy: [5.0, 5.0]
+  patrol_altitude_m: 1.5
+  patrol_standoff_m: 1.5                    # inspect each bay from y = 8.0 - standoff
+  geofence_polygon_xy: [[-0.5,3.5],[10.5,3.5],[10.5,7.8],[-0.5,7.8]]
+  max_alt_m: 4.0
+  max_speed_mps: 1.0
+  min_battery_pct: 30
+  min_dist_people_m: 3.0
+  lost_fix_land_s: 2.0
