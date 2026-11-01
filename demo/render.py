@@ -188,12 +188,49 @@ def submission(inputs: Path, output: Path) -> None:
     print(json.dumps(report, indent=2))
 
 
+def cctv_submission(inputs: Path, output: Path) -> None:
+    source = inputs / "cctv-assessed.mp4"
+    captions = inputs / "cctv-captions.txt"
+    for path in (source, captions):
+        if not path.is_file():
+            raise FileNotFoundError(f"Missing input: {path}; see SOURCES.md")
+    lines = captions.read_text().splitlines()
+    if not lines or len(lines) > 2 or any(len(line) > 140 for line in lines):
+        raise ValueError("CCTV captions must have one or two lines, at most 140 characters each")
+    duration = float(subprocess.check_output([
+        "ffprobe", "-v", "error", "-show_entries", "format=duration",
+        "-of", "default=noprint_wrappers=1:nokey=1", str(source),
+    ]))
+    video = output / "sentinel-submission-cctv.mp4"
+    caption_copy = output / "cctv-captions.txt"
+    shutil.copyfile(captions, caption_copy)
+    filters = (
+        "scale=1920:1000:force_original_aspect_ratio=decrease,"
+        "pad=1920:1080:(ow-iw)/2:32:color=0xF7F6F4,setsar=1,"
+        f"drawtext=fontfile={MONO}:fontsize=18:fontcolor=0x2E6BF0:x=80:y=7:"
+        "text='SENTINEL / ACTi CCTV / RECORDED ASSESSMENT',"
+        f"drawtext=fontfile={SANS}:fontsize=17:fontcolor=0x66717B:x=80:y=1038:"
+        f"textfile='{caption_copy}':expansion=none:line_spacing=3"
+    )
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(source),
+         "-t", str(min(duration, 88.0)), "-vf", filters, "-an", "-c:v", "libx264",
+         "-preset", "fast", "-crf", "22", "-maxrate", "3500k", "-bufsize", "7000k",
+         "-threads", "4", "-r", "30", "-pix_fmt", "yuv420p", "-movflags",
+         "+faststart", str(video)])
+    report = check_video(video, 1, 90)
+    (output / "cctv-validation.json").write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps(report, indent=2))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inputs", type=Path, default=ROOT / "inputs")
-    parser.add_argument("--cards-only", action="store_true")
-    parser.add_argument("--submission-only", action="store_true",
-                        help="Export the 88-second working-product-only submission (no slides)")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--cards-only", action="store_true")
+    mode.add_argument("--submission-only", action="store_true",
+                      help="Export the earlier simulated-dashboard cut (no slides)")
+    mode.add_argument("--cctv-only", action="store_true",
+                      help="Export the actual CCTV assessment without unrelated example footage")
     args = parser.parse_args()
     scenes = json.loads((ROOT / "storyboard.json").read_text())
     assert 120 <= sum(s["duration"] for s in scenes) <= 150
@@ -202,6 +239,9 @@ def main() -> None:
             raise RuntimeError(f"Install {executable} before rendering")
     for directory in (ROOT / "cards", ROOT / "output" / "segments"):
         directory.mkdir(parents=True, exist_ok=True)
+    if args.cctv_only:
+        cctv_submission(args.inputs, ROOT / "output")
+        return
     if args.submission_only:
         submission(args.inputs, ROOT / "output")
         return

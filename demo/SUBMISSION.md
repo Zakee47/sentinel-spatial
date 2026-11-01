@@ -9,7 +9,7 @@ Sentinel turns CCTV and drone-camera observations into a shared 3D map of retail
 
 **Public GitHub repository:** https://github.com/Zakee47/sentinel-spatial
 
-**Demo video:** use the separately delivered `sentinel-submission-88s.mp4`, not the longer presentation cut. The form requires at most 90 seconds of the working product and no slides. Upload to YouTube (unlisted), Loom, or Drive; allow anyone with the link to view and check in a signed-out browser before pasting the link. A Devin attachment is not a public video link.
+**Demo video:** Zak requested the CCTV example with assessments of the same footage. Use the CCTV-only replacement, `sentinel-submission-cctv.mp4`, once delivered—not the earlier simulated-dashboard cut or longer presentation montage. The form requires at most 90 seconds of the working product and no slides. Upload to YouTube (unlisted), Loom, or Drive; allow anyone with the link to view and check in a signed-out browser before pasting the link. A Devin attachment is not a public video link.
 
 ## Submission checks
 
