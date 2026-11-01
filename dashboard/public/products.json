@@ -1,0 +1,162 @@
+[
+  {
+    "product_id": "SKU-001",
+    "name": "Semi-Skimmed Milk 2 Pints",
+    "brand": "Cravendale",
+    "barcode": "5000295142619",
+    "price_gbp": 1.85,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-002",
+    "name": "Free Range Eggs 6 Pack",
+    "brand": "Happy Egg Co",
+    "barcode": "5060196780065",
+    "price_gbp": 2.1,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-003",
+    "name": "Salted Butter 250g",
+    "brand": "Lurpak",
+    "barcode": "5740900400153",
+    "price_gbp": 3.25,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-004",
+    "name": "Mature Cheddar 400g",
+    "brand": "Cathedral City",
+    "barcode": "5000295038172",
+    "price_gbp": 4.5,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-005",
+    "name": "Greek Style Yogurt 500g",
+    "brand": "Yeo Valley",
+    "barcode": "5036589200496",
+    "price_gbp": 2.0,
+    "zone_id": "aisle-A-shelf-1"
+  },
+  {
+    "product_id": "SKU-006",
+    "name": "Medium Sliced White Bread 800g",
+    "brand": "Warburtons",
+    "barcode": "5010044000701",
+    "price_gbp": 1.45,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-007",
+    "name": "Excellence 70% Cocoa 100g",
+    "brand": "Lindt",
+    "barcode": "3046920022606",
+    "price_gbp": 2.75,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-008",
+    "name": "Dairy Milk 180g",
+    "brand": "Cadbury",
+    "barcode": "7622210449283",
+    "price_gbp": 2.25,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-009",
+    "name": "Digestive Biscuits 400g",
+    "brand": "McVitie's",
+    "barcode": "5000168001272",
+    "price_gbp": 1.69,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-010",
+    "name": "Ready Salted Crisps 6 Pack",
+    "brand": "Walkers",
+    "barcode": "5000328657455",
+    "price_gbp": 2.0,
+    "zone_id": "aisle-A-shelf-2"
+  },
+  {
+    "product_id": "SKU-011",
+    "name": "Baked Beans 415g",
+    "brand": "Heinz",
+    "barcode": "5000157024671",
+    "price_gbp": 1.4,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-012",
+    "name": "Cream of Tomato Soup 400g",
+    "brand": "Heinz",
+    "barcode": "5000157024688",
+    "price_gbp": 1.5,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-013",
+    "name": "Tuna Chunks in Spring Water 145g",
+    "brand": "John West",
+    "barcode": "5000171003256",
+    "price_gbp": 1.95,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-014",
+    "name": "Penne Pasta 500g",
+    "brand": "Napolina",
+    "barcode": "5014061003020",
+    "price_gbp": 1.25,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-015",
+    "name": "Basmati Rice 1kg",
+    "brand": "Tilda",
+    "barcode": "5011157633101",
+    "price_gbp": 3.2,
+    "zone_id": "aisle-A-shelf-3"
+  },
+  {
+    "product_id": "SKU-016",
+    "name": "Yorkshire Tea 80 Bags",
+    "brand": "Taylors",
+    "barcode": "5010357000015",
+    "price_gbp": 3.5,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-017",
+    "name": "Gold Instant Coffee 100g",
+    "brand": "Nescafe",
+    "barcode": "7613036931028",
+    "price_gbp": 5.25,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-018",
+    "name": "Orange Juice Smooth 1L",
+    "brand": "Tropicana",
+    "barcode": "5017764110013",
+    "price_gbp": 2.6,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-019",
+    "name": "Cola Zero 2L",
+    "brand": "Coca-Cola",
+    "barcode": "5449000131836",
+    "price_gbp": 2.15,
+    "zone_id": "aisle-A-shelf-4"
+  },
+  {
+    "product_id": "SKU-020",
+    "name": "Sparkling Water 1L",
+    "brand": "Highland Spring",
+    "barcode": "5010136000022",
+    "price_gbp": 0.95,
+    "zone_id": "aisle-A-shelf-4"
+  }
+]
