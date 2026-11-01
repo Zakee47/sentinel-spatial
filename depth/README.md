@@ -109,7 +109,8 @@ python -m depth.ingest_scan /path/to/mesh.glb --up y
 
 Supported: `.ply`/`.pcd` (Open3D), `.las`/`.laz` (laspy/lazrs), `.e57`
 (optional pye57; all scans and stored scanner transforms), `.obj`/`.glb`/`.gltf`
-(uniformly sample 200k mesh surface points; not new measurements).
+(uniformly sample 200k mesh surface points; not new measurements). GLB/GLTF use
+trimesh to preserve scene-node transforms and avoid Open3D GLB reader issues.
 
 Units must be known: `--unit-m 0.001` for millimetres; default metres. A
 gravity-constrained floor RANSAC rejects walls/ceilings, rotates the floor to

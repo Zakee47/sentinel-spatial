@@ -120,3 +120,36 @@ def test_sparse_missing_correspondences():
         sparse_depth_scale(
             np.ones((2, 2)), pose, Camera("PINHOLE", 2, 2, np.ones(4)), {}
         )
+
+
+@pytest.mark.parametrize("suffix", [".las", ".laz"])
+def test_laser_scan_import(tmp_path: Path, suffix: str):
+    import laspy
+
+    scan = laspy.LasData(laspy.LasHeader(point_format=3, version="1.2"))
+    scan.x, scan.y, scan.z = [0.0, 1.0, 2.0], [2.0, 3.0, 4.0], [0.0, 0.0, 0.0]
+    scan.red, scan.green, scan.blue = [65535] * 3, [0] * 3, [0] * 3
+    path = tmp_path / ("scan" + suffix)
+    scan.write(path)
+    points, colors = read_cloud(path)
+    np.testing.assert_allclose(points[:, 0], [0, 1, 2])
+    np.testing.assert_allclose(colors, [[1, 0, 0]] * 3)
+
+
+@pytest.mark.parametrize("suffix", [".obj", ".glb", ".pcd"])
+def test_open3d_formats(tmp_path: Path, suffix: str):
+    import open3d as o3d
+
+    path = tmp_path / ("scan" + suffix)
+    mesh = o3d.geometry.TriangleMesh.create_box()
+    mesh.compute_vertex_normals()
+    if suffix == ".pcd":
+        assert o3d.io.write_point_cloud(str(path), mesh.sample_points_uniformly(100))
+    elif suffix == ".glb":
+        import trimesh
+
+        trimesh.creation.box().export(path)
+    else:
+        assert o3d.io.write_triangle_mesh(str(path), mesh)
+    points, _ = read_cloud(path, mesh_points=100)
+    assert len(points) == 100

@@ -221,6 +221,17 @@ def read_cloud(path: Path, mesh_points: int = 200000) -> tuple[Array, Array]:
             chunks.append(xyz)
             rgb_chunks.append(rgb)
         return np.concatenate(chunks), np.concatenate(rgb_chunks)
+    if suffix in {".glb", ".gltf"}:
+        import trimesh
+
+        scene = trimesh.load_scene(str(path))
+        mesh = scene.to_geometry()
+        points, faces = trimesh.sample.sample_surface(mesh, mesh_points)
+        visual = (
+            mesh.visual.to_color() if mesh.visual.kind == "texture" else mesh.visual
+        )
+        colors = np.asarray(visual.face_colors[faces, :3], dtype=float) / 255
+        return points, colors
     import open3d as o3d
 
     if suffix in {".obj", ".glb", ".gltf"}:
