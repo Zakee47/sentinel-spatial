@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "name": "holding_product",
+  "type": "predicate",
+  "input_text": "Image 1: crop of the shopper's hand near the shelf zone (faces are blurred). Image 2: crop of the shelf the hand just left.",
+  "instructions": "Is the shopper's hand holding a product that was taken from this shelf? Answer true only if a product package is visibly gripped in the hand and it plausibly matches products on the shelf. An empty hand, a phone, a bag, a basket handle or the shopper's own belongings is false."
+}

@@ -1,0 +1,5 @@
+path,label
+../samples/bay_full.jpg,ok
+../samples/bay_empty.jpg,empty
+../samples/bay_low_stock.jpg,low_stock
+../samples/bay_misplaced.jpg,misplaced

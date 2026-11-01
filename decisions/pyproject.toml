@@ -4,9 +4,20 @@ version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = ["openai>=1.0", "pyyaml"]
 
+[project.optional-dependencies]
+db = ["psycopg[binary]>=3.1"]
+dev = ["pytest>=8", "ruff>=0.6", "pillow>=10"]
+
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["sentinel_decisions"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
