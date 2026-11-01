@@ -1,0 +1,40 @@
+{
+  "metric": "observed_occupied_voxel_fraction",
+  "voxel_m": 0.2,
+  "registered": false,
+  "warning": "Unseen space is unknown, not empty; surfaces are not solid volume.",
+  "bays": [
+    {
+      "zone_id": "bay-B-01",
+      "n_points": 0,
+      "occupied_voxels": 0,
+      "total_voxels": 1560,
+      "fill_pct": null,
+      "status": "unregistered"
+    },
+    {
+      "zone_id": "bay-B-02",
+      "n_points": 0,
+      "occupied_voxels": 0,
+      "total_voxels": 1560,
+      "fill_pct": null,
+      "status": "unregistered"
+    },
+    {
+      "zone_id": "bay-B-03",
+      "n_points": 0,
+      "occupied_voxels": 0,
+      "total_voxels": 1560,
+      "fill_pct": null,
+      "status": "unregistered"
+    },
+    {
+      "zone_id": "bay-B-04",
+      "n_points": 6,
+      "occupied_voxels": 5,
+      "total_voxels": 1560,
+      "fill_pct": null,
+      "status": "unregistered"
+    }
+  ]
+}
