@@ -16,7 +16,7 @@
 
 ## 01:00–01:35 · How it works — REAL CCTV / MOCK EVENT MODE / REAL CROP CALLS
 
-“This is actual CCTV footage, not our earlier shopper example. Local pose tracking produced four look estimates and two pass-by events; it detected no pick-up or put-back. Three separate, real OpenAI Decisions calls assess face-masked crops from this same recording. Their engagement scores, confidence and review policies are model estimates—not verified purchases or proof of those event labels. The event run itself used mock mode. Devin is the mission-manager integration: plan inspections and raise staff tasks, never fly the aircraft. Its demonstrated run was simulated; a real API launch was not verified.”
+"This is actual CCTV footage, not our earlier shopper example. Local pose tracking produced four look estimates and two pass-by events; it detected no pick-up or put-back. Three separate, real OpenAI Decisions calls assess unblurred crops from this same recording. Their engagement scores, confidence and review policies are model estimates—not verified purchases or proof of those event labels. The event run itself used mock mode. Devin is the mission-manager integration: plan inspections and raise staff tasks, never fly the aircraft. Its demonstrated run was simulated; a real API launch was not verified."
 
 **Show:** ACTi tracking annotation → actual crop/result insets → drone panel. This is one non-looping file run with ACTi-specific manual calibration, not a live RTSP camera. Do not substitute the earlier Pexels eight-event result, old twelve-event RTSP result, or another run's counts. The manual 0.69 px fit residual is not measured metric/SKU accuracy. The hosted dashboard remains a separate simulated replay, not this clip's event store.
 
@@ -26,11 +26,11 @@
 
 **Show:** patrol GIF; expanded REA card; learned-depth cloud. No connected aircraft or live phone mirroring was verified. The supplied cloud uses approximate calibration and assumed poses; independent frames are **not** a fused metric survey. The metric rack/twin preview is procedural geometry.
 
-## 02:20–02:40 · Privacy — LIVE PRODUCT DESIGN
+## 02:20–02:40 · Privacy — CURRENT DEMO LIMITS
 
-“The processing pipeline is designed to keep video local. No face recognition, no customer identity across visits: just short-lived tracks and events. Only small, face-blurred evidence crops go to the model. These public demo clips are presentation material, not customer footage uploaded by the product.”
+"Video decoding and pose inference run locally, using temporary track IDs rather than face recognition. Those IDs are not a unique-person count. This public ACTi demo and its three API crops are intentionally unblurred at the owner's request. We are not claiming anonymisation; production redaction needs site-level validation."
 
-**Show:** privacy card. The CCTV assessment export masks face/head regions; this is a demo redaction, not a certified anonymisation guarantee. Real API crops must match the masked images actually sent, not earlier whole-crop-blurred inputs.
+**Show:** privacy-limit card. Do not describe this export or its API inputs as blurred, privacy-safe or anonymised. The fresh real API calls must match the unblurred images actually sent, not earlier masked inputs.
 
 ## 02:40–03:00 · What comes next — LIVE PRODUCT ROADMAP
 
@@ -46,14 +46,14 @@
 
 **00:28–00:43 · REAL CCTV / MIXED REAL + MOCK** — “This ACTi recording produced four look estimates and two pass-by events in mock event mode. Three separate real Decisions calls assess crops from the same footage. Drone flight and the demonstrated mission-manager run remain simulations.”
 
-**00:43–01:00 · SIMULATION / LIVE PRODUCT RESEARCH** — “REA found no supported Neo 2 control SDK, so humans or DJI fly; we ingest video, not flight commands. Depth is estimated, not LiDAR. No identities across visits; local video and small blurred crops. Next is calibrated, real-site validation.”
+**00:43–01:00 · SIMULATION / LIVE PRODUCT RESEARCH** — "REA found no supported Neo 2 control SDK, so humans or DJI fly; we ingest video, not flight commands. Depth is estimated, not LiDAR. This public demo and its API crops are unblurred. Next is calibrated, real-site validation."
 
 ## Judge Q&A crib
 
 | Question | Short, defensible answer |
 | --- | --- |
 | Why Decisions API rather than a chat model? | We need bounded choices, probabilities/confidences and scores that map to explicit auto/review/ignore thresholds, rather than free-form prose. The same crop can answer a versioned question set; logs record policy, usage and latency. It does not remove the need for calibration or ground truth. |
-| What did the real API actually do? | Three real `gpt-6-luna` `engagement_level` calls assessed masked crops from the ACTi footage. We show the exact crop, source timestamp, engagement score (0–3), confidence and routing policy. The raw responses are separate from the mock event run. Single frames do not verify walking/stopping or purchases. Earlier synthetic bay examples exist in PR #3 but are not this submission's evidence. |
+| What did the real API actually do? | Three fresh real `gpt-6-luna` `engagement_level` calls assessed unblurred crops from the ACTi footage, as requested by the owner. We show the exact crop, source timestamp, engagement score (0–3), confidence and routing policy. The raw responses are separate from the mock event run. Single frames do not verify walking/stopping or purchases. Earlier synthetic bay examples exist in PR #3 but are not this submission's evidence. |
 | What does a decision cost? | We have token usage, not a verified dollar bill or published rate here. A sample bay call used 3,061 input tokens, 2,036 cached; severity used 2,325, 2,141 cached. Multiply uncached/cached input and output tokens by the applicable account rates. Include retries, multiple questions and crop frequency. Do not invent cents per decision; measure billed usage before quoting unit economics. |
 | Can Devin fly into a person? | Devin is not in the flight loop. The Neo 2 live driver is video-only and rejects flight methods. Human/DJI controls the aircraft. Simulated flight has local geofence, speed/altitude, battery, lost-fix/link and person-proximity tests; that is not a hardware safety certification. |
 | Is the cloud LiDAR? | No. Depth Anything V2 estimates axial depth from video, then RGB points are back-projected with approximate intrinsics/pose. No Neo 2 raw depth export, no validated metric scan, and no multi-frame fusion without matched poses. |

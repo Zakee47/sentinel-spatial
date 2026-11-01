@@ -91,7 +91,7 @@ def make_card(scene: dict, index: int, target: Path) -> None:
         boxes = [
             ("01 / OBSERVE", "CCTV + drone video", "Local perception\nShort-lived tracks"),
             ("02 / LOCATE", "Shared twin", "Shelf / bay context\nMetric coordinates"),
-            ("03 / JUDGE", "OpenAI Decisions", "Small blurred crops\nAuto / review / ignore"),
+            ("03 / JUDGE", "OpenAI Decisions", "Small image crops\nAuto / review / ignore"),
             ("04 / ACT", "Devin missions", "Plan inspections\nRaise staff tasks"),
         ]
         for n, (label, title, body) in enumerate(boxes):
@@ -105,9 +105,9 @@ def make_card(scene: dict, index: int, target: Path) -> None:
     elif kind == "privacy":
         wrapped(d, scene["title"], (80, 185), 1740, 82, bold=True, gap=10)
         for n, (heading, body) in enumerate([
-            ("LOCAL VIDEO", "Processing stays on the edge."),
-            ("SMALL CROPS", "Only face-blurred evidence goes to the API."),
-            ("NO IDENTITY", "No face recognition or cross-visit identity."),
+            ("LOCAL PROCESSING", "Video decoding and pose inference run locally."),
+            ("DEMO API INPUTS", "Three unblurred public-footage crops go to the API."),
+            ("NO FACE ID", "Track IDs are not face recognition or unique people."),
         ]):
             y = 493 + n * 145
             d.rectangle((90, y + 9, 104, y + 23), fill=BLUE)

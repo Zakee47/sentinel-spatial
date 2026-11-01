@@ -11,7 +11,7 @@ Put these source files in `demo/inputs/`, or pass another folder with `--inputs 
 | Required basename | Source / honest description |
 | --- | --- |
 | `dashboard.mp4` | This session's real-time hosted replay capture, 1400×1050; browser content 1400×899, DPR1. Source is `demo/raw/w11-hosted-walkthrough-realtime.mp4`, also supplied separately as an attachment. Do not use the recording tool's accelerated edit: storyboard timestamps refer to real time. |
-| `cctv-assessed.mp4` | Actual ACTi CCTV assessment export from the CCTV workstream: pose/track overlays and three separately recorded real Decisions crop calls. Use the readable, face/head-masked export, not the superseded whole-scene-blurred cut. Event-run mock status and calibration caveats remain visible. |
+| `cctv-assessed.mp4` | Actual ACTi CCTV assessment export from the CCTV workstream: pose/track overlays and three freshly recorded real Decisions crop calls. Zak directly requested "no blur please": use the unblurred video and unblurred API crops, not superseded masked cuts/results. No anonymisation is claimed. Event-run mock status and calibration caveats remain visible. |
 | `patrol.gif` | Supplied 7-second four-bay simulator output; looped and explicitly labelled SIMULATION. No physical flight. |
 | `preview.png` | Supplied procedural metric twin preview (214,658 points). No captured survey. |
 | `cloud.png` | Supplied actual learned-depth inference evidence from Tiger Lily / [Pexels warehouse clip 4294436](https://www.pexels.com/video/4294436/). Depth Anything V2 Metric Indoor Small; 20,688 rendered RGB points. Approximate calibration, assumed pose, independent frames, not fused and not measured LiDAR. See PR #9 for model licensing/usage caveats. |
@@ -45,7 +45,7 @@ Zak requested the ACTi CCTV example and an assessment of that same footage, **no
 
 The CCTV workstream ran integration commit `19236da` with the ACTi file, explicit `camera-1-cctv.json`, `--mock --no-post`, one non-looping pass. It processed 905 frames from the 1810-frame, 30fps source (15fps processing). Exact event output: **4 look, 2 pass_by, 0 pick_up, 0 put_back**. The 17 issued tracker IDs are not 17 unique people; maximum simultaneous detections was 5. These counts differ from a separate RTSP test and must not be substituted with that test's numbers.
 
-The real `gpt-6-luna` crop calls are separate from the mock-mode event run. Their score is an engagement-scale estimate (0–3), not a probability or accuracy; confidence and policy are separate fields. Single-frame crop judgments do not verify walking/stopping, purchases, SKU identity or the heuristic event labels. Keep the exact source timestamps, crop hashes and raw responses in the assessment report/logs. Do not reuse earlier whole-crop-blurred API outputs on newly face-masked images.
+The real `gpt-6-luna` crop calls are separate from the mock-mode event run. Their score is an engagement-scale estimate (0–3), not a probability or accuracy; confidence and policy are separate fields. Single-frame crop judgments do not verify walking/stopping, purchases, SKU identity or the heuristic event labels. Keep the exact source timestamps, crop hashes and raw responses in the assessment report/logs. Final video and API crops are unblurred at the owner's explicit request; this is public source material, not anonymised customer footage. Do not reuse earlier blurred-crop API outputs on the new unblurred images.
 
 ## Real hosted capture
 

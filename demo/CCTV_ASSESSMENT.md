@@ -27,9 +27,9 @@ Source times come from the CCTV workstream's emission-time instrumentation. Even
 
 ## Real OpenAI assessment versus mock mode
 
-Three separate **real `gpt-6-luna` `engagement_level` calls** assess masked person crops at 19.07, 22.20 and 31.73 seconds from this same recording. They are separate from the perception event run, not confirmations that its look/pass-by labels are correct.
+Three separate **real `gpt-6-luna` `engagement_level` calls** assess unblurred person crops at 19.07, 22.20 and 31.73 seconds from this same recording. They are fresh calls on the final unblurred inputs, as requested by Zak, not reused results from the superseded masked crops. They are separate from the perception event run, not confirmations that its look/pass-by labels are correct.
 
-Each inset must show the exact image submitted, its source time, returned score, confidence and policy. The supplied raw-response log records crop bounds/hashes and mock-disabled request metadata. A new face-masked crop needs a new call: never reuse the old whole-crop-blurred result as if it assessed the new image.
+Each inset shows the exact image submitted, its source time, returned score, confidence and policy. The supplied raw-response log records crop bounds/hashes and mock-disabled request metadata. A changed crop needs a new call: never reuse an old blurred-crop result as if it assessed the unblurred image.
 
 The engagement **score is on a 0–3 scale, not a probability or accuracy**. Confidence and review/ignore policy are separate. A single image cannot verify walking, stopping, a product pick-up, a purchase or intent; model labels remain estimates.
 
@@ -39,6 +39,6 @@ The engagement **score is on a 0–3 scale, not a probability or accuracy**. Con
 - **Not a metric survey:** eight manually assumed floor correspondences fit with 0.69 px reprojection residual. A small fit residual does not validate distances, shelf locations or SKU identity.
 - **Not product-behaviour ground truth:** no products were identified in these events. There is no validated pick-up, put-back, conversion or purchase count.
 - **Not a live installation:** this was file input with posting disabled. The separate hosted replay's heatmap, Ask answer and counts are simulated and are not derived from this CCTV recording.
-- **Not a privacy certification:** face/head masking is a demo redaction; no face recognition or cross-visit identity is used. Detection-based redaction needs site-level validation before customer deployment.
+- **Not anonymised:** Zak explicitly requested no blur for this public CCTV example, including the fresh API crops. Temporary track IDs do not make visible faces anonymous. No face recognition or cross-visit identity is used, but this export is not privacy-safe customer footage; production redaction needs site-level validation.
 
 Use the CCTV-only submission cut, not the superseded Pexels/RTSP snapshot montage. The broader presentation still shows separately labelled dashboard and drone simulations; they must not be presented as results generated from this clip.
