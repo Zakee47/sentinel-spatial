@@ -174,8 +174,9 @@ attribution is appreciated, and the footage must not imply endorsement. This
 is a short moving warehouse shot with a worker, not an ideal survey walkthrough.
 The initial 1280 px, unfiltered run extracted **18 frames**, registered **18 images**
 and produced **2,313 sparse points**. With the Neo 2 defaults (1600 px, blur variance
-threshold 50), **9/18** frames survived, **9 images** registered and **297 points**
-were reconstructed. This illustrates the overlap/blur-threshold trade-off; use
+threshold 50), **9/18** frames survived, **9 images** registered and **1,232 points**
+were reconstructed in the final smoke run (297 in a previous run; COLMAP's
+initialization varies). This illustrates the overlap/blur-threshold trade-off; use
 the frame scores and a slower, sharper capture rather than assuming a threshold
 is universally appropriate. There are **no Sentinel portals or measured dimensions**
 in this stock clip, so the pipeline correctly refused to invent metric scale
