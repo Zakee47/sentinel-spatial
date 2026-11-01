@@ -2,6 +2,7 @@ import './style.css';
 import { createIcons, ArrowUpRight, ArrowUp, Radio, Box, Crosshair, Layers, RotateCcw, Expand, Play, Pause, ShieldCheck, ScanLine, ChevronRight, Check, X, Bot, Square, Video, Battery, Eye, Package, Route, MessageSquare, CircleHelp } from 'lucide';
 import { TwinScene } from './scene';
 import { Store, parseReplay } from './store';
+import { droneModeLabel } from './layers';
 import type { AgentRun, DroneState, Funnel, Heatmap, Message, Product, ReplayRow, SentinelEvent, Site, Task } from './types';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -9,7 +10,8 @@ const esc = (s: unknown) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&a
 const icon = (name: string, cls = '') => `<i data-lucide="${name}" class="${cls}"></i>`;
 const icons = () => createIcons({ icons: { ArrowUpRight, ArrowUp, Radio, Box, Crosshair, Layers, RotateCcw, Expand, Play, Pause, ShieldCheck, ScanLine, ChevronRight, Check, X, Bot, Square, Video, Battery, Eye, Package, Route, MessageSquare, CircleHelp } });
 const params = new URLSearchParams(location.search);
-const replayUrl = params.get('replay');
+const hostedReplay = location.hostname.endsWith('.github.io') && !params.has('api') && !params.has('live');
+const replayUrl = params.get('replay') ?? (hostedReplay ? 'demo.jsonl' : null);
 const base = import.meta.env.BASE_URL;
 const api = (params.get('api') ?? import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 const store = new Store();
@@ -32,13 +34,13 @@ $('app').innerHTML = `
       <div class="twin-column">
         <section class="twin-card" aria-label="Interactive warehouse digital twin">
           <div class="panel-toolbar"><div class="panel-title">${icon('box')} Digital twin <span class="tiny-tag" id="twin-source">Metric geometry</span></div><div class="view-controls"><button id="view-3d" class="selected">3D</button><button id="view-top">Top</button><button id="reset" class="icon-button" aria-label="Reset view">${icon('rotate-ccw')}</button><button id="fullscreen" class="icon-button" aria-label="Expand twin">${icon('expand')}</button></div></div>
-          <div id="scene"><div class="scene-corner"><span class="live-dot"></span><span id="scene-status">LIVE SPATIAL VIEW</span><small>DEMO-WAREHOUSE / METRES</small></div><div class="scene-axis"><span>N</span><div>↑</div></div><div class="scene-legend"><label><input type="checkbox" id="heat-toggle" checked/> <span class="legend-square blue"></span> Shelf attention</label><label><input type="checkbox" id="people-toggle" checked/> <span class="legend-dot"></span> Anonymous tracks</label><span class="legend-path"></span><span>Patrol route</span></div><div class="scene-hint">Drag to orbit · scroll to zoom</div></div>
+          <div id="scene"><div class="scene-corner"><span class="live-dot"></span><span id="scene-status">LIVE SPATIAL VIEW</span><small>DEMO-WAREHOUSE / METRES</small></div><div class="scene-axis"><span>N</span><div>↑</div></div><div class="scene-legend"><label><input type="checkbox" id="heat-toggle" checked/> <span class="legend-square blue"></span> Shelf attention</label><label><input type="checkbox" id="people-toggle" checked/> <span class="legend-dot"></span> Anonymous tracks</label><label title="Depth asset not available"><input type="checkbox" id="depth-toggle" disabled/> <span class="legend-square"></span> Depth estimate</label><span class="legend-path"></span><span>Patrol route</span></div><div class="scene-hint">Drag to orbit · scroll to zoom</div></div>
           <div class="replay-bar" id="replay-bar" hidden><button id="play" class="icon-button" aria-label="Pause replay">${icon('pause')}</button><span class="mono" id="replay-time">00:00 / 01:00</span><input id="scrub" type="range" min="0" max="60" step="0.1" value="0" aria-label="Replay timeline"/><select id="speed" aria-label="Replay speed"><option value="0.5">0.5×</option><option selected value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select><button id="restart" class="icon-button" aria-label="Restart replay">${icon('rotate-ccw')}</button><span class="tiny-tag">READ ONLY</span></div>
           <div class="metrics"><div><span class="metric-label">SHELF ATTENTION</span><strong id="metric-attention">0<span>s</span></strong><small>Aggregate dwell time</small></div><div><span class="metric-label">LOOK → KEPT</span><strong id="metric-conversion">0<span>%</span></strong><small>Anonymous product funnel</small></div><div><span class="metric-label">BAYS INSPECTED</span><strong id="metric-bays">0<span>/ 4</span></strong><small>This patrol</small></div><div><span class="metric-label">OPEN TASKS</span><strong id="metric-tasks">0</strong><small>Ready for the floor</small></div></div>
         </section>
       </div>
       <aside class="right-column">
-        <section class="drone-card panel" id="drone-panel"><div class="section-top"><p class="eyebrow">EYES IN THE AISLE</p><span class="tiny-tag" id="drone-mode">SIM POSITION</span></div><h2>Drone–01 <span class="drone-state" id="drone-state">Standby</span></h2>
+        <section class="drone-card panel" id="drone-panel"><div class="section-top"><p class="eyebrow">EYES IN THE AISLE</p><span class="tiny-tag" id="drone-mode">MODE UNKNOWN</span></div><h2>Drone–01 <span class="drone-state" id="drone-state">Standby</span></h2>
           <div class="drone-preview" id="drone-preview"><div class="preview-grid"></div><div class="drone-reticle">${icon('scan-line')}</div><span class="feed-label">DJI NEO 2 / <span id="feed-status">NO LIVE FEED</span></span><span class="feed-coordinate" id="drone-coordinates">X 5.0 / Y 5.0 / Z 0.0</span><img id="drone-feed" alt="Drone live feed" hidden/></div>
           <div class="drone-details"><span>${icon('battery')} <b id="battery">—</b></span><span>${icon('crosshair')} <b id="current-bay">Home</b></span></div><p id="last-decision" class="decision-note">Waiting for a bay inspection. Safety supervisor always has final say.</p>
           <div class="drone-actions"><button class="button" id="mission">${icon('bot')} Launch Devin mission ${icon('arrow-up-right')}</button><button class="stop-button" id="stop" title="Request safe landing">${icon('square')} STOP</button></div>
@@ -47,6 +49,8 @@ $('app').innerHTML = `
         <section class="assistant panel"><div class="assistant-heading"><span class="assistant-mark">${icon('message-square')}</span><div><h2>Ask Sentinel</h2><span>From observation to understanding.</span></div></div><p id="ask-answer" aria-live="polite">Your space has a story. Ask about a shelf, a product, or what needs attention.</p><button class="suggestion" id="ask-suggestion">Which shelf underperformed? ${icon('arrow-up-right')}</button><form id="ask-form"><label class="sr-only" for="ask-input">Ask about your floor</label><input id="ask-input" placeholder="Ask about your floor…" required/><button aria-label="Send question">${icon('arrow-up')}</button></form><span class="assistant-footnote">GROUNDED IN YOUR EVENT STORE</span></section>
       </aside>
     </section>
+    <section class="cctv-card panel" id="cctv-card" hidden><div><p class="eyebrow">ON-SITE CAMERA / 01</p><h2>CCTV · camera-1</h2><p>Local MJPEG feed · video stays on site.</p></div><img id="cctv-feed" alt="Live CCTV from camera-1"/></section>
+    <section class="rea-card panel" id="rea-card" hidden aria-label="Drone integration findings"></section>
     <section class="insight-grid" id="insights"><div class="panel funnel-panel"><div class="section-top"><div><p class="eyebrow">FROM ATTENTION TO ACTION</p><h2>What catches their eye.</h2></div><span class="tiny-tag">PRODUCT FUNNEL</span></div><div class="table-scroll"><table><thead><tr><th>Product / shelf</th><th>Looked</th><th>Interested</th><th>Picked</th><th>Put back</th><th>Kept</th><th>Sold*</th></tr></thead><tbody id="funnel-body"></tbody></table></div><div class="panel-footnote">${icon('eye')} High attention, low conversion is flagged automatically. <span>* Mock till data / unavailable in local replay</span></div></div>
     <div class="panel task-panel" id="operations"><div class="section-top"><div><p class="eyebrow">CLOSE THE LOOP</p><h2>Floor tasks <span id="task-count" class="count">0</span></h2></div>${icon('package')}</div><div id="tasks" class="task-list"></div></div></section>
     <section class="activity-grid"><div class="panel event-panel"><div class="section-top"><div><p class="eyebrow">OBSERVE → DECIDE</p><h2>The floor, as it happens.</h2></div><span id="event-count" class="tiny-tag">0 EVENTS</span></div><div id="events" class="event-list"></div></div><div class="panel review-panel"><div class="section-top"><div><p class="eyebrow">HUMAN IN THE LOOP</p><h2>Review queue <span class="count" id="review-count">0</span></h2></div>${icon('shield-check')}</div><div id="reviews"></div><p class="muted">Uncertain Decisions API answers stay here until a person confirms them.</p></div></section>
@@ -63,6 +67,32 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
 }
 async function staticJson<T>(file: string): Promise<T> { const response = await fetch(`${base}${file}`); if (!response.ok) throw new Error(`Cannot load ${file}`); return response.json() as Promise<T>; }
 function safeUrl(input: string | null): string | null { if (!input) return null; try { const u = new URL(input, location.href); return ['http:', 'https:'].includes(u.protocol) ? u.href : null; } catch { return null; } }
+async function loadFindings() {
+  try {
+    const findings = await staticJson<{ verdict: string; verdict_summary: string; recommended_integration: string; video_paths: { name: string; how: string; live: boolean }[] }>('rea/findings.json');
+    if (!findings.verdict || !Array.isArray(findings.video_paths)) return;
+    $('rea-card').innerHTML = `<div><p class="eyebrow">REA · HOW THE APP FLIES THE DRONE</p><h2>Understand the link.<br/><span>Respect the limits.</span></h2><span class="tiny-tag">${esc(human(findings.verdict))}</span><p>${esc(findings.verdict_summary)}</p></div><div><h3>Video paths</h3>${findings.video_paths.map(path => `<details><summary>${esc(path.name)} <span>${path.live ? 'LIVE' : 'POST-FLIGHT'}</span></summary><p>${esc(path.how)}</p></details>`).join('')}</div><div><h3>Recommended integration</h3><p>${esc(findings.recommended_integration)}</p><a href="${base}rea/findings.json" target="_blank" rel="noopener noreferrer">View research findings ↗</a></div>`;
+    $('rea-card').hidden = false;
+  } catch { /* Findings arrive independently; omit the card until available. */ }
+}
+function connectCctv() {
+  const image = $('cctv-feed') as HTMLImageElement;
+  let timeout: ReturnType<typeof setTimeout>;
+  let retry: ReturnType<typeof setTimeout>;
+  const failed = () => {
+    clearTimeout(timeout); clearTimeout(retry);
+    $('cctv-card').hidden = true;
+    image.removeAttribute('src');
+    retry = setTimeout(connect, 30_000);
+  };
+  const connect = () => {
+    image.onload = () => { clearTimeout(timeout); $('cctv-card').hidden = false; };
+    image.onerror = failed;
+    image.src = 'http://localhost:8090/cameras/camera-1/mjpeg';
+    timeout = setTimeout(failed, 8000);
+  };
+  connect();
+}
 function human(value: string) { return value.replaceAll('_', ' ').replaceAll('bay-', '').replace('aisle-A-shelf-', 'Shelf A'); }
 function answerText(value: unknown) { return typeof value === 'string' ? value : JSON.stringify(value); }
 function readOnly() { return !!replayUrl || demo || !connected; }
@@ -87,7 +117,7 @@ function render() {
   icons();
 }
 function renderDrone(d: DroneState) {
-  $('drone-state').textContent = human(d.state); $('drone-mode').textContent = d.mode === 'sim' ? 'SIM POSITION' : 'LIVE POSITION';
+  $('drone-state').textContent = human(d.state); $('drone-mode').textContent = droneModeLabel(d);
   $('battery').textContent = `${d.battery_pct.toFixed(0)}%`; $('current-bay').textContent = human(d.current_bay ?? 'Home');
   $('drone-coordinates').textContent = `X ${d.x.toFixed(1)} / Y ${d.y.toFixed(1)} / Z ${d.z.toFixed(1)} M`;
   $('last-decision').textContent = d.last_decision ? `Decisions API → ${answerText(d.last_decision)}` : 'Waiting for a bay inspection. Safety supervisor always has final say.';
@@ -103,7 +133,7 @@ async function loadReplay(url: string, fallback = false) {
   $('scene-status').textContent = fallback ? 'LOCAL DEMO / SIMULATED' : 'RECORDED SPATIAL VIEW';
   setStatus(fallback ? 'Offline · local demo' : 'Replay · read only');
   $('mode-link').innerHTML = `${icon('radio')} ${replayUrl ? 'Connect live' : 'Open replay'}`;
-  $('mode-link').setAttribute('href', replayUrl ? base : '?replay=demo.jsonl');
+  $('mode-link').setAttribute('href', replayUrl ? `${base}?live=1` : '?replay=demo.jsonl');
   drain(); render();
 }
 function drain() { while (cursor < rows.length && rows[cursor].t <= elapsed) store.ingest(rows[cursor++].msg); }
@@ -125,6 +155,8 @@ function websocket() {
   socket.onclose = () => { connected = false; setStatus('Reconnecting'); render(); clearTimeout(reconnect); reconnect = setTimeout(websocket, 4000); };
 }
 async function boot() {
+  void loadFindings();
+  connectCctv();
   try {
     let site: Site;
     if (replayUrl) { [site, products] = await Promise.all([staticJson<Site>('site.json'), staticJson<Product[]>('products.json')]); }
@@ -161,6 +193,7 @@ $('reset').onclick = () => $('view-3d').click();
 $('fullscreen').onclick = () => { if (document.fullscreenElement) void document.exitFullscreen(); else void document.querySelector('.twin-card')?.requestFullscreen(); };
 $('heat-toggle').onchange = e => scene?.toggleHeat((e.target as HTMLInputElement).checked);
 $('people-toggle').onchange = e => scene?.togglePeople((e.target as HTMLInputElement).checked);
+$('depth-toggle').onchange = e => scene?.toggleDepth((e.target as HTMLInputElement).checked);
 $('play').onclick = () => { if (elapsed >= duration) seek(0); playing = !playing; updatePlay(); };
 $('restart').onclick = () => { seek(0); playing = true; updatePlay(); };
 $('speed').onchange = e => { speed = Number((e.target as HTMLSelectElement).value); };
