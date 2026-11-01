@@ -75,7 +75,9 @@ limits or return-to-home; our supervisor sits on top of DJI's, never in place of
 
 ## What is mocked
 
-- **Flight**: simulated (the human pilots the real Neo 2). Live mode shows the portal PnP position when a
+- **Flight**: simulated (the human pilots the real Neo 2). In live mode DroneState carries
+  `"piloted": true, "flight": "piloted"` (extra fields beyond the contract) so the dashboard can label
+  the drone as human-flown; sim mode sends `"piloted": false, "flight": "sim"`. Live mode shows the portal PnP position when a
   portal QR is in view, else the sim estimate (`fix_source` = `portal` / `estimate` in DroneState).
 - **Decisions in mock mode** (`SENTINEL_DECISIONS_MOCK=1`): the mock always answers `ok`, so in **sim** the
   simulator's ground truth is substituted and labelled `answer.type = "sim_truth"`. With real decisions the

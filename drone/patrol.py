@@ -307,4 +307,7 @@ class Patrol:
                 "z": round(tel.z, 3), "yaw_deg": round(tel.yaw_deg, 1), "battery_pct": round(tel.battery_pct, 1),
                 "current_bay": self.current_bay, "last_decision": self.last_decision,
                 "stop_requested": stop_requested, "mission_id": (self.mission or {}).get("mission_id"),
-                "feed_url": getattr(self.camera, "feed_url", None), "fix_source": tel.fix_source}
+                "feed_url": getattr(self.camera, "feed_url", None), "fix_source": tel.fix_source,
+                # live = the real Neo 2 is human-flown via DJI Fly; the patrol track is simulated
+                "piloted": self.mode == "live",
+                "flight": "piloted" if self.mode == "live" else "sim"}
