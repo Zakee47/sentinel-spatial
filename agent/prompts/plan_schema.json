@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "bays": {"type": "array", "items": {"type": "string"}},
+    "reason": {"type": "string"},
+    "tasks": {"type": "array", "items": {"type": "object", "properties": {"zone_id": {"type": "string"}, "kind": {"type": "string"}, "severity": {"type": "string"}, "note": {"type": "string"}}, "required": ["zone_id", "kind", "severity", "note"]}},
+    "summary": {"type": "string"}
+  },
+  "required": ["bays", "reason", "tasks", "summary"]
+}
