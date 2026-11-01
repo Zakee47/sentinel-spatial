@@ -58,6 +58,18 @@ fitting fails, it produces the labelled box fallback and records
 successful scan:** check `twin.json.source == "colmap"` for that. Missing input
 or invalid usage exits nonzero. No video is uploaded or committed.
 
+`scripts/drone_twin.sh <clip.mp4> [survey.json]` also runs video-depth against
+the captured frames and COLMAP model, applies the saved
+`T_twin_colmap_final` matrix (floor refinement composed with the anchor), and
+publishes both clouds under `dashboard/public/{twin,depth}/out/`. The
+`twin.json` records the persistent reconstruction `workspace`, final transform,
+registration provenance, and whether the alignment is metric. `TWIN_OUT_DIR`
+and `DEPTH_OUT_DIR` can select alternate local outputs; set
+`DRONE_TWIN_PUBLISH=0` to keep a test run out of the dashboard. A failed
+reconstruction keeps the procedural box twin and exports depth explicitly
+labelled `assumed_camera_pose`; those coordinates are not a metric site
+registration. `twin/examples/alignment.json` is mechanics-test data only.
+
 Default extraction: **2 fps**, max **160 frames**, max width **1600 px**, aspect
 ratio retained (4K is never sent to COLMAP at full resolution). If the clip is
 longer than 80 s, sampling is automatically spaced across its **whole duration**

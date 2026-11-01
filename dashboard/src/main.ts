@@ -33,8 +33,8 @@ $('app').innerHTML = `
     <section class="workspace">
       <div class="twin-column">
         <section class="twin-card" aria-label="Interactive warehouse digital twin">
-          <div class="panel-toolbar"><div class="panel-title">${icon('box')} Digital twin <span class="tiny-tag" id="twin-source">Metric geometry</span></div><div class="view-controls"><button id="view-3d" class="selected">3D</button><button id="view-top">Top</button><button id="reset" class="icon-button" aria-label="Reset view">${icon('rotate-ccw')}</button><button id="fullscreen" class="icon-button" aria-label="Expand twin">${icon('expand')}</button></div></div>
-          <div id="scene"><div class="scene-corner"><span class="live-dot"></span><span id="scene-status">LIVE SPATIAL VIEW</span><small>DEMO-WAREHOUSE / METRES</small></div><div class="scene-axis"><span>N</span><div>↑</div></div><div class="scene-legend"><label><input type="checkbox" id="heat-toggle" checked/> <span class="legend-square blue"></span> Shelf attention</label><label><input type="checkbox" id="people-toggle" checked/> <span class="legend-dot"></span> Anonymous tracks</label><label title="Depth asset not available"><input type="checkbox" id="depth-toggle" disabled/> <span class="legend-square"></span> Depth estimate</label><span class="legend-path"></span><span>Patrol route</span></div><div class="scene-hint">Drag to orbit · scroll to zoom</div></div>
+          <div class="panel-toolbar"><div class="panel-title">${icon('box')} Digital twin <span class="tiny-tag" id="twin-source">Box twin · unregistered</span></div><div class="view-controls"><button id="view-3d" class="selected">3D</button><button id="view-top">Top</button><button id="reset" class="icon-button" aria-label="Reset view">${icon('rotate-ccw')}</button><button id="fullscreen" class="icon-button" aria-label="Expand twin">${icon('expand')}</button></div></div>
+          <div id="scene"><div class="scene-corner"><span class="live-dot"></span><span id="scene-status">LIVE SPATIAL VIEW</span><small>DEMO-WAREHOUSE / METRES</small></div><div class="scene-axis"><span>N</span><div>↑</div></div><div class="scene-legend"><label><input type="checkbox" id="heat-toggle" checked/> <span class="legend-square blue"></span> Shelf attention</label><label><input type="checkbox" id="people-toggle" checked/> <span class="legend-dot"></span> Anonymous tracks</label><label title="Show the box twin"><input type="radio" name="twin-layer" id="box-toggle" checked/> <span class="legend-square"></span> Box twin</label><label title="COLMAP cloud not available"><input type="radio" name="twin-layer" id="colmap-toggle" disabled/> <span class="legend-square"></span> COLMAP cloud</label><label title="Depth asset not available"><input type="checkbox" id="depth-toggle" disabled/> <span class="legend-square"></span> <span id="depth-name">Depth estimate</span></label><span class="legend-path"></span><span>Patrol route</span></div><div class="scene-hint">Drag to orbit · scroll to zoom</div></div>
           <div class="replay-bar" id="replay-bar" hidden><button id="play" class="icon-button" aria-label="Pause replay">${icon('pause')}</button><span class="mono" id="replay-time">00:00 / 01:00</span><input id="scrub" type="range" min="0" max="60" step="0.1" value="0" aria-label="Replay timeline"/><select id="speed" aria-label="Replay speed"><option value="0.5">0.5×</option><option selected value="1">1×</option><option value="2">2×</option><option value="4">4×</option></select><button id="restart" class="icon-button" aria-label="Restart replay">${icon('rotate-ccw')}</button><span class="tiny-tag">READ ONLY</span></div>
           <div class="metrics"><div><span class="metric-label">SHELF ATTENTION</span><strong id="metric-attention">0<span>s</span></strong><small>Aggregate dwell time</small></div><div><span class="metric-label">LOOK → KEPT</span><strong id="metric-conversion">0<span>%</span></strong><small>Anonymous product funnel</small></div><div><span class="metric-label">BAYS INSPECTED</span><strong id="metric-bays">0<span>/ 4</span></strong><small>This patrol</small></div><div><span class="metric-label">OPEN TASKS</span><strong id="metric-tasks">0</strong><small>Ready for the floor</small></div></div>
         </section>
@@ -93,6 +93,15 @@ function connectCctv() {
   };
   connect();
 }
+document.addEventListener('sentinel:open-camera', event => {
+  const cameraId = (event as CustomEvent<{ cameraId: string }>).detail.cameraId;
+  if (cameraId !== 'camera-1') return;
+  const card = $('cctv-card'), image = $('cctv-feed') as HTMLImageElement;
+  const show = () => { card.hidden = false; card.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+  if (image.naturalWidth > 0) { show(); return; }
+  image.addEventListener('load', show, { once: true });
+  if (!image.getAttribute('src')) image.src = 'http://localhost:8090/cameras/camera-1/mjpeg';
+});
 function human(value: string) { return value.replaceAll('_', ' ').replaceAll('bay-', '').replace('aisle-A-shelf-', 'Shelf A'); }
 function answerText(value: unknown) { return typeof value === 'string' ? value : JSON.stringify(value); }
 function readOnly() { return !!replayUrl || demo || !connected; }
@@ -193,6 +202,8 @@ $('reset').onclick = () => $('view-3d').click();
 $('fullscreen').onclick = () => { if (document.fullscreenElement) void document.exitFullscreen(); else void document.querySelector('.twin-card')?.requestFullscreen(); };
 $('heat-toggle').onchange = e => scene?.toggleHeat((e.target as HTMLInputElement).checked);
 $('people-toggle').onchange = e => scene?.togglePeople((e.target as HTMLInputElement).checked);
+$('box-toggle').onchange = e => { if ((e.target as HTMLInputElement).checked) scene?.toggleTwin('box'); };
+$('colmap-toggle').onchange = e => { if ((e.target as HTMLInputElement).checked) scene?.toggleTwin('colmap'); };
 $('depth-toggle').onchange = e => scene?.toggleDepth((e.target as HTMLInputElement).checked);
 $('play').onclick = () => { if (elapsed >= duration) seek(0); playing = !playing; updatePlay(); };
 $('restart').onclick = () => { seek(0); playing = true; updatePlay(); };

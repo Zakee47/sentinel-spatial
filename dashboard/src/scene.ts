@@ -1,12 +1,18 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import type { Site, Zone } from './types';
+import type { Site, SiteCamera, Zone } from './types';
 import type { Store } from './store';
 import { decodePointCloud } from './layers';
 
 const BLUE = 0x317cff;
 const vec = (x: number, y: number, z: number) => new THREE.Vector3(x, z, -y);
+const cameraCalibration = {
+  'camera-1': {
+    hfov_deg: 100,
+    T_twin_cam: [0.6880531662, -0.7250741678, -0.0291597608, 2.0629465506, -0.7225292726, -0.6882599094, 0.0651900867, 3.0247216062, -0.0673371422, -0.0237854648, -0.9974467209, 1.8181210652, 0, 0, 0, 1],
+  },
+};
 
 export class TwinScene {
   private scene = new THREE.Scene();
@@ -18,7 +24,12 @@ export class TwinScene {
   private people = new THREE.Group();
   private drone = new THREE.Group();
   private depth = new THREE.Group();
+  private boxTwin = new THREE.Group();
+  private colmapTwin = new THREE.Group();
   private labels: { el: HTMLElement; position: THREE.Vector3 }[] = [];
+  private cameraTargets: THREE.Object3D[] = [];
+  private raycaster = new THREE.Raycaster();
+  private droneCamera: { label: HTMLElement } | undefined;
   private zoneHeat = new Map<string, THREE.Mesh>();
   private clock = new THREE.Clock();
   private lastPeople = 0;
@@ -26,7 +37,7 @@ export class TwinScene {
   private labelLayer: HTMLElement;
   private store: Store;
   private host: HTMLElement;
-  public source = 'Metric geometry';
+  public source = 'Box twin · unregistered';
   constructor(host: HTMLElement, site: Site, store: Store) {
     this.host = host; this.store = store;
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -44,8 +55,10 @@ export class TwinScene {
     const sun = new THREE.DirectionalLight(0xffffff, 3.2); sun.position.set(-5, 14, 8); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
     Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 15, bottom: -15 }); sun.shadow.bias = -.001;
     this.scene.add(sun);
-    this.scene.add(this.fallback, this.heat, this.people, this.drone, this.depth);
+    this.scene.add(this.fallback, this.heat, this.people, this.drone, this.depth, this.boxTwin, this.colmapTwin);
     this.depth.visible = false;
+    this.boxTwin.visible = false; this.colmapTwin.visible = false;
+    this.depth.rotation.x = -Math.PI / 2;
     this.box(this.scene, vec(5, 4.6, -.15), [12, .22, 11], 0xe8e5e0);
     const grid = new THREE.GridHelper(12, 24, 0xd2cfc9, 0xdad7d1); grid.position.copy(vec(5, 4.6, -.025)); this.scene.add(grid);
     site.zones.forEach(z => this.makeZone(z));
@@ -62,15 +75,14 @@ export class TwinScene {
       this.box(this.scene, p.clone().add(new THREE.Vector3(0, 0, .03)), [.13, .13, .02], 0xffffff);
       this.label(portal.id, p.clone().add(new THREE.Vector3(0, .3, 0)), 'portal-label');
     }
-    const cam = vec(.5, .3, 3.2); this.box(this.scene, cam, [.32, .23, .45], 0x191919);
-    for (const p of [[.5, 2, .1], [4.5, 2, .1], [4.5, 2.5, 1.8], [.5, 2.5, 1.8]]) this.line([cam, vec(...p as [number, number, number])], BLUE, false, .2);
-    this.label('CAMERA–01', cam.clone().add(new THREE.Vector3(0, .4, 0)), 'camera-label');
     this.box(this.drone, new THREE.Vector3(), [.36, .1, .23], 0x191919);
     for (const x of [-.24, .24]) for (const z of [-.24, .24]) {
       const rotor = new THREE.Mesh(new THREE.TorusGeometry(.13, .018, 6, 20), new THREE.MeshStandardMaterial({ color: BLUE })); rotor.rotation.x = Math.PI / 2; rotor.position.set(x, 0, z); this.drone.add(rotor);
       this.line([new THREE.Vector3(), new THREE.Vector3(x, 0, z)], 0x191919, false, 1, this.drone);
     }
     this.drone.position.copy(vec(5, 5, altitude));
+    for (const camera of site.cameras) this.addCameraFrustum(camera, site);
+    this.renderer.domElement.addEventListener('click', event => this.openCameraAt(event));
     new ResizeObserver(() => this.resize()).observe(host); this.resize();
     this.renderer.setAnimationLoop(() => this.draw());
     void this.loadTwin();
@@ -106,11 +118,103 @@ export class TwinScene {
     else if (zone.id.endsWith('2')) this.label('AISLE A · ATTENTION', vec(cx, b.y0, height + .65), 'attention-label');
   }
   private label(text: string, position: THREE.Vector3, cls: string) { const el = document.createElement('span'); el.className = `scene-label ${cls}`; el.textContent = text; this.labelLayer.append(el); this.labels.push({ el, position }); }
+  private cameraLabel(cameraId: string, position: THREE.Vector3) {
+    const el = document.createElement('button');
+    el.type = 'button'; el.className = 'scene-label camera-label'; el.textContent = cameraId;
+    el.setAttribute('aria-label', `Open ${cameraId}`);
+    el.addEventListener('click', () => this.dispatchCamera(cameraId));
+    this.labelLayer.append(el); this.labels.push({ el, position });
+    return el;
+  }
+  private dispatchCamera(cameraId: string) {
+    document.dispatchEvent(new CustomEvent('sentinel:open-camera', { detail: { cameraId } }));
+  }
+  private cameraPose(camera: SiteCamera, site: Site): THREE.Matrix4 | null {
+    const values = camera.T_twin_cam_override?.length === 16
+      ? camera.T_twin_cam_override
+      : cameraCalibration[camera.id as keyof typeof cameraCalibration]?.T_twin_cam;
+    if (values) return new THREE.Matrix4().set(...values as [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number]);
+    const portal = site.portals.find(candidate => candidate.id === camera.anchor_portal);
+    if (!portal) return null;
+    const portalPose = new THREE.Matrix4().set(...portal.T_twin_portal as [number, number, number, number, number, number, number, number, number, number, number, number, number, number, number, number]);
+    const right = new THREE.Vector3().setFromMatrixColumn(portalPose, 0);
+    const up = new THREE.Vector3().setFromMatrixColumn(portalPose, 1);
+    const normal = new THREE.Vector3().setFromMatrixColumn(portalPose, 2);
+    const position = new THREE.Vector3().setFromMatrixPosition(portalPose).addScaledVector(normal, 1.5).addScaledVector(up, .5);
+    return new THREE.Matrix4().makeBasis(right, up.negate(), normal.negate()).setPosition(position);
+  }
+  private attachCameraFrustum(group: THREE.Group, cameraId: string, origin: THREE.Vector3, corners: THREE.Vector3[]) {
+    const faces: THREE.Vector3[] = [];
+    const edges: THREE.Vector3[] = [];
+    for (let i = 0; i < 4; i++) {
+      faces.push(origin, corners[i], corners[(i + 1) % 4]);
+      edges.push(origin, corners[i], corners[i], corners[(i + 1) % 4]);
+    }
+    faces.push(corners[0], corners[1], corners[2], corners[0], corners[2], corners[3]);
+    const fillGeometry = new THREE.BufferGeometry().setFromPoints(faces);
+    const fill = new THREE.Mesh(fillGeometry, new THREE.MeshBasicMaterial({ color: BLUE, transparent: true, opacity: .035, side: THREE.DoubleSide, depthWrite: false }));
+    fill.userData.cameraId = cameraId; group.add(fill); this.cameraTargets.push(fill);
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(edges), new THREE.LineBasicMaterial({ color: BLUE, transparent: true, opacity: .55 }));
+    group.add(lines);
+  }
+  private addCameraFrustum(camera: SiteCamera, site: Site) {
+    const hfov = camera.hfov_deg ?? camera.fov_deg ?? cameraCalibration[camera.id as keyof typeof cameraCalibration]?.hfov_deg ?? 90;
+    const length = 4, halfWidth = length * Math.tan(hfov * Math.PI / 360), halfHeight = halfWidth / (16 / 9);
+    const localCorners = [
+      new THREE.Vector3(-halfWidth, -halfHeight, length),
+      new THREE.Vector3(halfWidth, -halfHeight, length),
+      new THREE.Vector3(halfWidth, halfHeight, length),
+      new THREE.Vector3(-halfWidth, halfHeight, length),
+    ];
+    if (camera.kind === 'drone') {
+      const group = new THREE.Group();
+      const origin = new THREE.Vector3();
+      const corners = [
+        new THREE.Vector3(-halfWidth, -halfHeight, -length),
+        new THREE.Vector3(halfWidth, -halfHeight, -length),
+        new THREE.Vector3(halfWidth, halfHeight, -length),
+        new THREE.Vector3(-halfWidth, halfHeight, -length),
+      ];
+      this.attachCameraFrustum(group, camera.id, origin, corners);
+      this.drone.add(group);
+      const label = this.cameraLabel(camera.id, this.drone.position.clone().add(new THREE.Vector3(0, .4, 0)));
+      this.droneCamera = { label };
+      return;
+    }
+    const pose = this.cameraPose(camera, site);
+    if (!pose) return;
+    const twinOrigin = new THREE.Vector3().applyMatrix4(pose);
+    const origin = vec(twinOrigin.x, twinOrigin.y, twinOrigin.z);
+    const corners = localCorners.map(point => {
+      const world = point.applyMatrix4(pose);
+      return vec(world.x, world.y, world.z);
+    });
+    const group = new THREE.Group();
+    this.attachCameraFrustum(group, camera.id, origin, corners);
+    this.scene.add(group);
+    this.cameraLabel(camera.id, origin.clone().add(new THREE.Vector3(0, .3, 0)));
+  }
+  private openCameraAt(event: MouseEvent) {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
+    this.raycaster.setFromCamera(pointer, this.camera);
+    const hit = this.raycaster.intersectObjects(this.cameraTargets, false)[0];
+    if (hit) this.dispatchCamera(String(hit.object.userData.cameraId));
+  }
   resetView() { this.camera.position.set(15, 13.5, 12); this.controls?.target.copy(vec(4.3, 4.7, .5)); this.controls?.update(); }
   topView() { this.camera.position.copy(vec(5, 4.5, 22)); this.controls.target.copy(vec(5, 4.5, 0)); this.controls.update(); }
   toggleHeat(visible: boolean) { this.heat.visible = visible; }
   togglePeople(visible: boolean) { this.showPeople = visible; this.people.visible = visible; }
   toggleDepth(visible: boolean) { this.depth.visible = visible; }
+  toggleTwin(layer: 'box' | 'colmap') {
+    const hasBoxAsset = this.boxTwin.children.length > 0;
+    this.fallback.visible = layer === 'box' && !hasBoxAsset;
+    this.boxTwin.visible = layer === 'box' && hasBoxAsset;
+    this.colmapTwin.visible = layer === 'colmap' && this.colmapTwin.children.length > 0;
+    this.source = layer === 'colmap' ? 'COLMAP cloud' : 'Box twin · unregistered';
+    const sourceLabel = document.querySelector('#twin-source');
+    if (sourceLabel) sourceLabel.textContent = this.source;
+  }
   private cloud(buffer: ArrayBuffer, size: number) {
     const { positions, colors } = decodePointCloud(buffer);
     const geometry = new THREE.BufferGeometry();
@@ -123,14 +227,22 @@ export class TwinScene {
       const response = await fetch(`${import.meta.env.BASE_URL}depth/out/depth_points.bin`);
       if (!response.ok || response.headers.get('content-type')?.includes('text/html')) return;
       this.depth.add(this.cloud(await response.arrayBuffer(), .035));
+      const metadata: { registration?: string } = await fetch(`${import.meta.env.BASE_URL}depth/out/depth.json`).then(result => result.ok ? result.json() : {});
       const toggle = document.querySelector<HTMLInputElement>('#depth-toggle');
-      if (toggle) { toggle.disabled = false; toggle.parentElement!.title = 'Estimated depth · optional xyzrgb point cloud'; }
+      const registration = metadata.registration ?? 'unregistered';
+      if (toggle) {
+        toggle.disabled = false;
+        toggle.parentElement!.title = `Depth point cloud · ${registration}`;
+        const name = document.querySelector('#depth-name');
+        if (name) name.textContent = registration === 'assumed_camera_pose' ? 'Depth · assumed pose' : registration === 'example_alignment' ? 'Depth · example alignment' : 'Depth estimate';
+      }
     } catch { /* Optional depth is unavailable; keep its toggle disabled. */ }
   }
   private resize() { const { clientWidth: w, clientHeight: h } = this.host; this.camera.aspect = w / Math.max(h, 1); this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h); }
   private draw() {
     const t = this.clock.getElapsedTime(); this.controls.update();
     if (this.store.drone) { const d = this.store.drone; this.drone.position.lerp(vec(d.x, d.y, d.z), .12); this.drone.rotation.y = -d.yaw_deg * Math.PI / 180; }
+    if (this.droneCamera) this.labels.find(label => label.el === this.droneCamera?.label)?.position.copy(this.drone.position).add(new THREE.Vector3(0, .4, 0));
     for (const [id, mesh] of this.zoneHeat) (mesh.material as THREE.MeshBasicMaterial).opacity = Math.min(.65, .03 + (this.store.heatmap.zones[id]?.look_s ?? 0) / 110);
     if (t - this.lastPeople > .3) { this.updatePeople(); this.lastPeople = t; }
     for (const label of this.labels) { const p = label.position.clone().project(this.camera); label.el.style.transform = `translate(-50%,-50%) translate(${(p.x + 1) / 2 * this.host.clientWidth}px,${(-p.y + 1) / 2 * this.host.clientHeight}px)`; label.el.style.display = p.z > 1 ? 'none' : ''; }
@@ -156,9 +268,26 @@ export class TwinScene {
       const info = await res.json();
       if (info.source === 'colmap' && info.point_count > 0) {
         const binary = await fetch(`${base}twin/out/twin_points.bin`); if (!binary.ok) throw new Error('Point cloud missing');
-        this.scene.add(this.cloud(await binary.arrayBuffer(), .025)); this.fallback.visible = false; this.source = 'COLMAP point cloud';
+        const cloud = this.cloud(await binary.arrayBuffer(), .025);
+        cloud.rotation.x = -Math.PI / 2;
+        this.colmapTwin.add(cloud);
+        const toggle = document.querySelector<HTMLInputElement>('#colmap-toggle');
+        if (toggle) { toggle.disabled = false; toggle.checked = true; }
+        const boxToggle = document.querySelector<HTMLInputElement>('#box-toggle');
+        if (boxToggle) boxToggle.checked = false;
+        this.toggleTwin('colmap');
+        this.source = info.metric_registration === false ? 'COLMAP · example alignment' : 'COLMAP cloud';
       } else {
-        const gltf = await new GLTFLoader().loadAsync(`${base}twin/out/scene.glb`); gltf.scene.rotation.x = -Math.PI / 2; this.scene.add(gltf.scene); this.fallback.visible = false; this.source = info.source === 'simready' ? 'SimReady twin' : 'Metric box twin';
+        try {
+          const gltf = await new GLTFLoader().loadAsync(`${base}twin/out/scene.glb`);
+          gltf.scene.rotation.x = -Math.PI / 2; this.boxTwin.add(gltf.scene);
+        } catch { /* Keep the procedural box twin if its mesh asset is absent. */ }
+        const boxToggle = document.querySelector<HTMLInputElement>('#box-toggle');
+        if (boxToggle) boxToggle.checked = true;
+        const colmapToggle = document.querySelector<HTMLInputElement>('#colmap-toggle');
+        if (colmapToggle) colmapToggle.disabled = true;
+        this.toggleTwin('box');
+        this.source = info.source === 'boxes' ? 'Box twin · unregistered' : 'Box twin';
       }
       document.querySelector('#twin-source')!.textContent = this.source;
     } catch { /* Keep the metric fallback if optional twin assets are unavailable. */ }
