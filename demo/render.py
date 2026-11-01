@@ -166,10 +166,34 @@ def check_video(path: Path, minimum: float, maximum: float) -> dict:
     return {"file": path.name, **info["format"], **video}
 
 
+def submission(inputs: Path, output: Path) -> None:
+    source = inputs / "dashboard.mp4"
+    if not source.is_file():
+        raise FileNotFoundError(f"Missing input: {source}; see SOURCES.md")
+    video = output / "sentinel-submission-88s.mp4"
+    filters = (
+        "crop=1400:899:0:88,scale=1920:1000:force_original_aspect_ratio=decrease,"
+        "pad=1920:1080:(ow-iw)/2:40:color=0xF7F6F4,setsar=1,"
+        f"drawtext=fontfile={MONO}:fontsize=18:fontcolor=0x2E6BF0:x=182:y=10:"
+        "text='RECORDED PRODUCT / SIMULATED DATA / READ-ONLY',"
+        f"drawtext=fontfile={SANS}:fontsize=17:fontcolor=0x66717B:x=182:y=1050:"
+        "text='Hosted replay. Ask answers are local summaries. Drone flight is simulated; no aircraft connected.'"
+    )
+    run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(source),
+         "-t", "88", "-vf", filters, "-an", "-c:v", "libx264", "-preset", "fast",
+         "-crf", "22", "-maxrate", "3500k", "-bufsize", "7000k", "-threads", "4",
+         "-r", "30", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(video)])
+    report = check_video(video, 1, 90)
+    (output / "submission-validation.json").write_text(json.dumps(report, indent=2) + "\n")
+    print(json.dumps(report, indent=2))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--inputs", type=Path, default=ROOT / "inputs")
     parser.add_argument("--cards-only", action="store_true")
+    parser.add_argument("--submission-only", action="store_true",
+                        help="Export the 88-second working-product-only submission (no slides)")
     args = parser.parse_args()
     scenes = json.loads((ROOT / "storyboard.json").read_text())
     assert 120 <= sum(s["duration"] for s in scenes) <= 150
@@ -178,6 +202,9 @@ def main() -> None:
             raise RuntimeError(f"Install {executable} before rendering")
     for directory in (ROOT / "cards", ROOT / "output" / "segments"):
         directory.mkdir(parents=True, exist_ok=True)
+    if args.submission_only:
+        submission(args.inputs, ROOT / "output")
+        return
     for index, scene in enumerate(scenes, 1):
         card = ROOT / "cards" / f"{scene['id']}.png"
         make_card(scene, index, card)

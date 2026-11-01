@@ -21,9 +21,13 @@ Put these source files in `demo/inputs/`, or pass another folder with `--inputs 
 bash demo/build_video.sh --inputs /path/to/inputs
 # Cards-only preview:
 bash demo/build_video.sh --cards-only
+# Submission form: <=90 seconds, working product only, no slides:
+bash demo/build_video.sh --submission-only --inputs /path/to/inputs
 ```
 
 Output: `demo/output/sentinel-demo.mp4` and an identical explicitly named `sentinel-demo-no-vo.mp4` (silent, caption-led by design), plus three standalone clips. The same 1920×1080 H.264 settings apply to all. The renderer checks main duration 120–150 seconds, each clip 10–20 seconds, dimensions, codec and ≤60 MB per file. `validation.json` contains actual probe results. `storyboard.json` is the edit decision list and all card text; `render.py` is the Pillow card source.
+
+The separate `--submission-only` export creates `sentinel-submission-88s.mp4`: 88 seconds of the actual hosted UI, at real time, with browser chrome removed and persistent replay-disclosure captions. No title cards, slides, source-footage montage or simulated replacement UI is inserted. It shows timeline scrubbing, 3D/Top, unavailable depth, Ask, review queue and the drone/REA panel. `submission-validation.json` records the probe result. Use this shorter cut for the submission form, not the 135-second presentation video. Upload it to YouTube (unlisted), Loom, or Drive with anyone-with-the-link viewing, and verify signed-out access; Devin attachment links are not public judge links.
 
 ## Real hosted capture
 
