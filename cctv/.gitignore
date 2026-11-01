@@ -1,0 +1,4 @@
+bin/
+footage/
+cameras.local.yaml
+*.log

@@ -1,0 +1,4 @@
+codec_name=h264
+width=1280
+height=720
+r_frame_rate=30/1
