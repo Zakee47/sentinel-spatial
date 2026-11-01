@@ -52,7 +52,7 @@ export class TwinScene {
     const path = [site.drone.home_xy, ...site.zones.filter(z => z.kind === 'rack_bay').map(z => { const b = this.bounds(z); return [(b.x0 + b.x1) / 2, b.y0 - site.drone.patrol_standoff_m]; }), site.drone.home_xy];
     this.line(path.map(p => vec(p[0], p[1], altitude)), BLUE, true, .7);
     const home = new THREE.Mesh(new THREE.RingGeometry(.38, .42, 48), new THREE.MeshBasicMaterial({ color: BLUE, side: THREE.DoubleSide })); home.rotation.x = -Math.PI / 2; home.position.copy(vec(...[...site.drone.home_xy, .015] as [number, number, number])); this.scene.add(home);
-    this.label('HOME / P0', vec(5, 5, .12), 'subtle');
+    this.label('DRONE HOME', vec(5, 5, .12), 'subtle');
     for (const portal of site.portals) {
       const m = portal.T_twin_portal, p = vec(m[3], m[7], m[11]);
       const mark = new THREE.Mesh(new THREE.BoxGeometry(.25, .25, .04), new THREE.MeshStandardMaterial({ color: 0x191919 })); mark.position.copy(p); this.scene.add(mark);
@@ -119,7 +119,7 @@ export class TwinScene {
     while (this.people.children.length) { const obj = this.people.children[0] as THREE.Mesh; obj.geometry?.dispose(); if (obj.material) (obj.material as THREE.Material).dispose(); this.people.remove(obj); }
     this.people.visible = this.showPeople;
     const latest = this.store.events[0]?.ts; if (!latest) return;
-    const now = Date.parse(latest), tracks = new Map<string, typeof this.store.events>();
+    const now = Date.parse(latest) + performance.now() - this.store.lastEventReceived, tracks = new Map<string, typeof this.store.events>();
     for (const e of this.store.events) { if (!e.track_id || e.x == null || e.y == null || now - Date.parse(e.ts) > 12_000) continue; const track = tracks.get(e.track_id) ?? []; if (track.length < 5) track.push(e); tracks.set(e.track_id, track); }
     for (const track of tracks.values()) {
       const e = track[0], age = Math.max(0, (now - Date.parse(e.ts)) / 12000), opacity = 1 - age;

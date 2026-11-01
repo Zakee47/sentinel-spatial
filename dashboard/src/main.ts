@@ -157,7 +157,7 @@ async function refreshPanels() {
 }
 $('view-3d').onclick = () => { scene?.resetView(); $('view-3d').classList.add('selected'); $('view-top').classList.remove('selected'); };
 $('view-top').onclick = () => { scene?.topView(); $('view-top').classList.add('selected'); $('view-3d').classList.remove('selected'); };
-$('reset').onclick = () => scene?.resetView();
+$('reset').onclick = () => $('view-3d').click();
 $('fullscreen').onclick = () => { if (document.fullscreenElement) void document.exitFullscreen(); else void document.querySelector('.twin-card')?.requestFullscreen(); };
 $('heat-toggle').onchange = e => scene?.toggleHeat((e.target as HTMLInputElement).checked);
 $('people-toggle').onchange = e => scene?.togglePeople((e.target as HTMLInputElement).checked);
