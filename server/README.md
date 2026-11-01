@@ -103,3 +103,7 @@ websocat ws://localhost:8000/ws      # or: python -c "import asyncio,websockets;
 docker compose up -d db
 python -m pytest server/tests -q     # logic tests always run; API tests skip if Postgres is unreachable
 ```
+
+The API tests insert rows into whatever `DATABASE_URL` points at; to keep the demo DB clean run them against a
+scratch DB: `docker compose exec db createdb -U sentinel sentinel_test` then
+`DATABASE_URL=postgresql://sentinel:sentinel@localhost:5432/sentinel_test python -m pytest server/tests -q`.
