@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
 from pathlib import Path
 from typing import Any
 
@@ -83,6 +84,8 @@ def main() -> None:
     ap.add_argument("--thresholds", default="0.3,0.4,0.5,0.55,0.6,0.7,0.8,0.85,0.9,0.95")
     args = ap.parse_args()
 
+    if os.environ.get("SENTINEL_DECISIONS_MOCK") == "1":
+        raise SystemExit("sweep needs the real API; unset SENTINEL_DECISIONS_MOCK")
     qtype = core.question_def(args.question)["type"]
     if qtype == "score":
         raise SystemExit("score questions are not supported by the sweep")
