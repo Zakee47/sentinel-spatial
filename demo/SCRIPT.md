@@ -14,11 +14,11 @@
 
 **Actions:** scrub early → late; Top → 3D; Ask suggestion; review queue. Keep versus look is a proxy, **not a confirmed purchase**. If depth is disabled, say “No depth asset is loaded in this hosted replay”; do not pretend to enable it.
 
-## 01:00–01:35 · How it works — LIVE PRODUCT / SIMULATION INPUTS
+## 01:00–01:35 · How it works — REAL CCTV / MOCK EVENT MODE / REAL CROP CALLS
 
-“Fixed CCTV and a moving drone camera feed local perception. Anonymous tracks and shelf interactions become events in the twin. Small, face-blurred crops go to OpenAI’s Decisions API: bounded questions such as ‘empty, low stock, misplaced, or okay?’ A real API test on drawn bay images returned okay at 0.88 confidence in 1.44 seconds; the empty bay returned 0.71 and went to review. Devin is the mission-manager integration: plan inspections and raise staff tasks, never fly the aircraft. Its demonstrated run used mock mode; a real API launch was not verified.”
+“This is actual CCTV footage, not our earlier shopper example. Local pose tracking produced four look estimates and two pass-by events; it detected no pick-up or put-back. Three separate, real OpenAI Decisions calls assess face-masked crops from this same recording. Their engagement scores, confidence and review policies are model estimates—not verified purchases or proof of those event labels. The event run itself used mock mode. Devin is the mission-manager integration: plan inspections and raise staff tasks, never fly the aircraft. Its demonstrated run was simulated; a real API launch was not verified.”
 
-**Show:** perception annotation → API result card → drone panel. The separate 22-second perception clip emitted eight events with mocked Decisions. The looped CCTV RTSP test emitted 12 events **with mocked perception decisions and reused calibration**; not validated SKU attribution.
+**Show:** ACTi tracking annotation → actual crop/result insets → drone panel. This is one non-looping file run with ACTi-specific manual calibration, not a live RTSP camera. Do not substitute the earlier Pexels eight-event result, old twelve-event RTSP result, or another run's counts. The manual 0.69 px fit residual is not measured metric/SKU accuracy. The hosted dashboard remains a separate simulated replay, not this clip's event store.
 
 ## 01:35–02:20 · The drone and REA — SIMULATION / LIVE PRODUCT RESEARCH
 
@@ -30,7 +30,7 @@
 
 “The processing pipeline is designed to keep video local. No face recognition, no customer identity across visits: just short-lived tracks and events. Only small, face-blurred evidence crops go to the model. These public demo clips are presentation material, not customer footage uploaded by the product.”
 
-**Show:** privacy card. Do not describe the visible, unblurred public source footage in the demo as an already anonymised recording.
+**Show:** privacy card. The CCTV assessment export masks face/head regions; this is a demo redaction, not a certified anonymisation guarantee. Real API crops must match the masked images actually sent, not earlier whole-crop-blurred inputs.
 
 ## 02:40–03:00 · What comes next — LIVE PRODUCT ROADMAP
 
@@ -44,7 +44,7 @@
 
 **00:12–00:28 · LIVE PRODUCT / SIMULATION DATA** — “This working dashboard replays simulated events: shelf attention, a kept-versus-look funnel, and a review queue. Ask Sentinel gives a local summary: 37 looks, two kept, 21 put back on A2. That is demo evidence, not confirmed sales.”
 
-**00:28–00:43 · LIVE PRODUCT / SIMULATION INPUTS** — “Local CCTV perception feeds a metric-coordinate twin; small crops go to OpenAI Decisions. Real API calls on synthetic bay images worked. The drone patrol and Devin-manager run shown are simulations; they create inspection and staff-task evidence.”
+**00:28–00:43 · REAL CCTV / MIXED REAL + MOCK** — “This ACTi recording produced four look estimates and two pass-by events in mock event mode. Three separate real Decisions calls assess crops from the same footage. Drone flight and the demonstrated mission-manager run remain simulations.”
 
 **00:43–01:00 · SIMULATION / LIVE PRODUCT RESEARCH** — “REA found no supported Neo 2 control SDK, so humans or DJI fly; we ingest video, not flight commands. Depth is estimated, not LiDAR. No identities across visits; local video and small blurred crops. Next is calibrated, real-site validation.”
 
@@ -53,13 +53,13 @@
 | Question | Short, defensible answer |
 | --- | --- |
 | Why Decisions API rather than a chat model? | We need bounded choices, probabilities/confidences and scores that map to explicit auto/review/ignore thresholds, rather than free-form prose. The same crop can answer a versioned question set; logs record policy, usage and latency. It does not remove the need for calibration or ground truth. |
-| What did the real API actually do? | PR #3 reports synthetic full bay → `ok`, confidence 0.88, 1.44 s; empty bay → `empty`, 0.71, review, 0.64 s; severity score 1.97 with `act_today` probability 0.97, 0.68 s. These are individual examples, not an accuracy benchmark. One low-stock sample was classified empty. |
+| What did the real API actually do? | Three real `gpt-6-luna` `engagement_level` calls assessed masked crops from the ACTi footage. We show the exact crop, source timestamp, engagement score (0–3), confidence and routing policy. The raw responses are separate from the mock event run. Single frames do not verify walking/stopping or purchases. Earlier synthetic bay examples exist in PR #3 but are not this submission's evidence. |
 | What does a decision cost? | We have token usage, not a verified dollar bill or published rate here. A sample bay call used 3,061 input tokens, 2,036 cached; severity used 2,325, 2,141 cached. Multiply uncached/cached input and output tokens by the applicable account rates. Include retries, multiple questions and crop frequency. Do not invent cents per decision; measure billed usage before quoting unit economics. |
 | Can Devin fly into a person? | Devin is not in the flight loop. The Neo 2 live driver is video-only and rejects flight methods. Human/DJI controls the aircraft. Simulated flight has local geofence, speed/altitude, battery, lost-fix/link and person-proximity tests; that is not a hardware safety certification. |
 | Is the cloud LiDAR? | No. Depth Anything V2 estimates axial depth from video, then RGB points are back-projected with approximate intrinsics/pose. No Neo 2 raw depth export, no validated metric scan, and no multi-frame fusion without matched poses. |
-| What is actually real versus simulated? | Real: browser UI, source-video decoding/perception, RTSP plumbing, recorded real Decisions API responses on synthetic inputs, CPU learned-depth inference and REA inspection. Simulated: hosted event replay, catalogue/till data, metric twin geometry, drone flight and demonstrated Devin mission run. No real aircraft integration demonstrated. |
+| What is actually real versus simulated? | Real: browser UI, ACTi source-video decoding/pose inference, three separately recorded real Decisions crop responses, RTSP plumbing, CPU learned-depth inference and REA inspection. Mock/simulated: perception event mode, hosted event replay, catalogue/till data, metric twin geometry, drone flight and demonstrated Devin mission run. No real aircraft integration demonstrated. |
 | Is “look” eye tracking or “kept” a sale? | Neither. Look is an approximate head-direction/keypoint proxy intersecting a shelf zone; this clip has manually estimated calibration and hip floor-position fallback. Kept is a reach/outcome estimate, not payment confirmation. |
-| Does the CCTV test prove SKU accuracy? | No. The 12-event RTSP run reused calibration from different footage and mocked the Decisions calls. It proves transport and event plumbing; site/product attribution needs new calibration and labelled validation. |
+| Does the CCTV test prove SKU accuracy? | No. The replacement uses ACTi-specific manual calibration, but its assumed coordinates and low reprojection residual are not surveyed geometry or product ground truth. Its actual output was four look estimates and two pass-bys, no pick-ups or put-backs. Separate real crop calls do not validate SKU attribution or the event labels. |
 | Did REA unlock private DJI controls? | No. It identified a private control architecture and official video path. We did not invoke private controls, modify firmware or change DJI safety features. No aircraft was connected during that investigation. |
 | Why not just use a camera dashboard? | The proposed value is a common spatial context: combine attention, inventory observations, inspection coverage and actionable tasks at the same shelf/bay. Measured business ROI remains future work. |
 
@@ -75,5 +75,6 @@
 - [#8 — simulated patrol and video-only live driver](https://github.com/Zakee47/sentinel-spatial/pull/8)
 - [#9 — learned video depth, not fused LiDAR](https://github.com/Zakee47/sentinel-spatial/pull/9)
 - [#10 — 12 events from looped CCTV RTSP; reused calibration](https://github.com/Zakee47/sentinel-spatial/pull/10)
+- [ACTi-specific manual calibration used by the replacement](https://github.com/Zakee47/sentinel-spatial/blob/19236da/perception/calib/camera-1-cctv.json)
 
-Numbers above are the workstreams' recorded results, not new benchmark runs by this demo pack.
+The ACTi replacement's exact event counts are from its delivered `events.jsonl` and `summary.json`, not the older transport-test counts. These are recorded prototype results, not an accuracy benchmark.

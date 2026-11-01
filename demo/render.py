@@ -264,7 +264,7 @@ def main() -> None:
     for name, ids in [
         ("clip-twin-heatmap", ["02-overview", "04-top"]),
         ("clip-drone-patrol", ["11-patrol"]),
-        ("clip-cctv-events", ["08-cctv", "07-perception"]),
+        ("clip-cctv-events", ["07-perception", "08-cctv"]),
     ]:
         playlist = output / f"{name}.txt"
         playlist.write_text("".join(f"file 'segments/{key}.mp4'\n" for key in ids))

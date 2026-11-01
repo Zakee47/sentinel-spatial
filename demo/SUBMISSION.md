@@ -5,7 +5,7 @@
 
 ## Project description (paste-ready)
 
-Sentinel turns CCTV and drone-camera observations into a shared 3D map of retail and warehouse spaces, helping teams spot empty shelves and understand shopper interactions. OpenAI Decisions judges small image crops, while a Devin mission manager plans inspections and staff tasks—not flight control.
+Sentinel is a spatial-AI prototype that analyses CCTV footage with anonymous tracking and OpenAI Decisions to assess shopper engagement, showing the evidence and uncertainty. A shared 3D store view and mission manager support inspections and staff tasks; drone flight remains human/DJI-controlled.
 
 **Public GitHub repository:** https://github.com/Zakee47/sentinel-spatial
 
@@ -16,4 +16,5 @@ Sentinel turns CCTV and drone-camera observations into a shared 3D map of retail
 - Confirm the repository is public and its README explains how judges can run it. This demo-only workstream does not edit the root README.
 - Presenter name, email and WhatsApp number must be supplied by the presenter. Do not infer contact details from git identity.
 - Optional X, LinkedIn and GitHub profile fields can be left blank if the presenter does not want to share them.
-- The working dashboard replays simulated data. Drone flight and the demonstrated mission-manager run are simulated. Real Decisions examples used synthetic images. Learned depth is not measured LiDAR.
+- The CCTV replacement uses real ACTi footage, actual pose inference and separate real Decisions crop calls. Its perception event run used mock mode and did not establish product/SKU behaviour. Do not call the recorded footage a live camera connection.
+- The older dashboard cut replays simulated data. Drone flight and the demonstrated mission-manager run are simulated. The original presentation's bay API examples used synthetic images; the revised CCTV examples do not. Learned depth is not measured LiDAR.

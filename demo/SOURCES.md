@@ -11,11 +11,12 @@ Put these source files in `demo/inputs/`, or pass another folder with `--inputs 
 | Required basename | Source / honest description |
 | --- | --- |
 | `dashboard.mp4` | This session's real-time hosted replay capture, 1400×1050; browser content 1400×899, DPR1. Source is `demo/raw/w11-hosted-walkthrough-realtime.mp4`, also supplied separately as an attachment. Do not use the recording tool's accelerated edit: storyboard timestamps refer to real time. |
-| `annotated.mp4` | Supplied 21.8-second perception annotation, 1280×720. [Pexels 5104001](https://www.pexels.com/video/customer-picking-food-items-from-a-supermarket-5104001/), [Pexels licence](https://www.pexels.com/license/). Real pose pipeline, manual approximate calibration, mocked Decisions. |
+| `cctv-assessed.mp4` | Actual ACTi CCTV assessment export from the CCTV workstream: pose/track overlays and three separately recorded real Decisions crop calls. Use the readable, face/head-masked export, not the superseded whole-scene-blurred cut. Event-run mock status and calibration caveats remain visible. |
 | `patrol.gif` | Supplied 7-second four-bay simulator output; looped and explicitly labelled SIMULATION. No physical flight. |
-| `snapshot.jpg` | Supplied RTSP snapshot from [ACTi retail CCTV clip](https://www.youtube.com/watch?v=-1bRhYjw1qE). Standard YouTube licence; permission in this demo brief is to show it in the presentation, not to commit raw footage or claim an open-source licence. This pack does not download the YouTube video. |
 | `preview.png` | Supplied procedural metric twin preview (214,658 points). No captured survey. |
 | `cloud.png` | Supplied actual learned-depth inference evidence from Tiger Lily / [Pexels warehouse clip 4294436](https://www.pexels.com/video/4294436/). Depth Anything V2 Metric Indoor Small; 20,688 rendered RGB points. Approximate calibration, assumed pose, independent frames, not fused and not measured LiDAR. See PR #9 for model licensing/usage caveats. |
+
+CCTV source: [ACTi retail-store footage](https://www.youtube.com/watch?v=-1bRhYjw1qE), standard YouTube licence. The brief permits presentation use, not committing footage or claiming an open-source licence. This renderer never downloads source footage. The earlier Pexels shopper annotation and RTSP snapshot are no longer used by the revised storyboard.
 
 ```sh
 bash demo/build_video.sh --inputs /path/to/inputs
@@ -29,7 +30,7 @@ bash demo/build_video.sh --cctv-only --inputs /path/to/cctv-inputs
 
 Output: `demo/output/sentinel-demo.mp4` and an identical explicitly named `sentinel-demo-no-vo.mp4` (silent, caption-led by design), plus three standalone clips. The same 1920×1080 H.264 settings apply to all. The renderer checks main duration 120–150 seconds, each clip 10–20 seconds, dimensions, codec and ≤60 MB per file. `validation.json` contains actual probe results. `storyboard.json` is the edit decision list and all card text; `render.py` is the Pillow card source.
 
-The separate `--submission-only` export creates `sentinel-submission-88s.mp4`: 88 seconds of the actual hosted UI, at real time, with browser chrome removed and persistent replay-disclosure captions. No title cards, slides, source-footage montage or simulated replacement UI is inserted. It shows timeline scrubbing, 3D/Top, unavailable depth, Ask, review queue and the drone/REA panel. `submission-validation.json` records the probe result. Use this shorter cut for the submission form, not the 135-second presentation video. Upload it to YouTube (unlisted), Loom, or Drive with anyone-with-the-link viewing, and verify signed-out access; Devin attachment links are not public judge links.
+The earlier `--submission-only` export creates `sentinel-submission-88s.mp4`: 88 seconds of the actual hosted UI, at real time, with browser chrome removed and persistent replay-disclosure captions. It shows timeline scrubbing, 3D/Top, unavailable depth, Ask, review queue and the drone/REA panel. `submission-validation.json` records its probe result. **Zak's later CCTV-only request supersedes this as the submission choice.** Use the CCTV-only export below instead. Upload the chosen video to YouTube (unlisted), Loom, or Drive with anyone-with-the-link viewing, and verify signed-out access; Devin attachment links are not public judge links.
 
 ## CCTV-only replacement
 
@@ -40,6 +41,12 @@ Zak requested the ACTi CCTV example and an assessment of that same footage, **no
 
 `--cctv-only` exports `sentinel-submission-cctv.mp4`: at most 88 seconds of that same input, real time, with persistent source/disclosure captions and **no inserted slides, shopper footage or simulated dashboard**. The renderer does not run perception or call an API; preserve the assessment report and logs with the input artifacts. The actual probe results are written to `cctv-validation.json`. Use this replacement rather than the earlier 88-second dashboard cut once the CCTV export is delivered.
 
+### Actual ACTi event run
+
+The CCTV workstream ran integration commit `19236da` with the ACTi file, explicit `camera-1-cctv.json`, `--mock --no-post`, one non-looping pass. It processed 905 frames from the 1810-frame, 30fps source (15fps processing). Exact event output: **4 look, 2 pass_by, 0 pick_up, 0 put_back**. The 17 issued tracker IDs are not 17 unique people; maximum simultaneous detections was 5. These counts differ from a separate RTSP test and must not be substituted with that test's numbers.
+
+The real `gpt-6-luna` crop calls are separate from the mock-mode event run. Their score is an engagement-scale estimate (0–3), not a probability or accuracy; confidence and policy are separate fields. Single-frame crop judgments do not verify walking/stopping, purchases, SKU identity or the heuristic event labels. Keep the exact source timestamps, crop hashes and raw responses in the assessment report/logs. Do not reuse earlier whole-crop-blurred API outputs on newly face-masked images.
+
 ## Real hosted capture
 
 Recorded 1 November 2026 at [the hosted dashboard](https://zakee47.github.io/sentinel-spatial/?replay=demo.jsonl). Source: 95.67 seconds at 1400 CSS px / DPR1, checked in an actual screenshot before capture. Screen recording contains browser chrome; the edit crops it away without scaling the browser viewport. Native UI remains real; no replacement data or generated UI overlays are inserted inside the dashboard.
@@ -48,6 +55,6 @@ Captured: late twin/heatmap, actual timeline drag early then late, Top→3D, una
 
 ## Fact-checking
 
-The workstream PRs #1–#10 are linked in [SCRIPT.md](SCRIPT.md). All quoted model timings/confidences come from PR #3's recorded real calls on **synthetic** inputs. The hosted replay is from PR #5's simulator; it is not the annotated perception clip's event recording. The eight-event perception result and twelve-event CCTV transport result are separate demonstrations, not one calibrated deployment. The separate footage clips must not be presented as the exact underlying source of the hosted heatmap.
+The workstream PRs #1–#10 are linked in [SCRIPT.md](SCRIPT.md). The revised CCTV section uses actual ACTi input and separately recorded real crop calls, not PR #3's earlier synthetic bay examples or the Pexels shopper results. The historical eight-event Pexels result and twelve-event RTSP transport result are not the current six-event ACTi run. The hosted replay is still from PR #5's simulator, **not** the actual CCTV event recording; do not imply that its heatmap or Ask counts are derived from this clip.
 
 The W8 mission-agent test used a mocked launch; the real key was rejected. No successful real Devin API session or real aircraft/phone connection is claimed. Neo 2 flight stays human-/DJI-controlled. The simulated supervisor is not hardware-certified.
