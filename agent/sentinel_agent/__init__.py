@@ -15,6 +15,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parent.parent
 BAYS = [f"bay-B-{i:02d}" for i in range(1, 5)]
+TASK_SEVERITY = {"none": 0.0, "minor": 1.0, "act_today": 2.0, "act_now": 3.0}
 _threads: dict[str, threading.Thread] = {}
 
 
@@ -153,11 +154,15 @@ def simulate_mission(goal: str, api_base: str, client: httpx.Client | None = Non
             return response.json()
 
         events = get("/api/events")
-        get("/api/tasks")
+        tasks = get("/api/tasks")
         get("/api/drone/state")
         get("/api/funnel")
         flagged = [e for e in events if e.get("type") == "bay_issue"
-                   and e.get("zone_id") in BAYS]
+                   and e.get("zone_id") in BAYS
+                   and (e.get("payload") or {}).get("issue") not in ("ok", "unclear")]
+        existing_source_events = {
+            task.get("source_event") for task in tasks if task.get("source_event")
+        }
         flagged_bays = list(dict.fromkeys(e["zone_id"] for e in flagged))
         cutoff = datetime.now(UTC) - timedelta(hours=24)
         recent = set()
@@ -176,10 +181,15 @@ def simulate_mission(goal: str, api_base: str, client: httpx.Client | None = Non
         if not mission.get("accepted"):
             raise RuntimeError(f"Mission rejected: {mission.get('rejected_reason', 'unknown reason')}")
         for event in flagged:
+            if event.get("event_id") in existing_source_events:
+                continue
             payload = event.get("payload") or {}
+            severity = payload.get("severity", "act_today")
+            if isinstance(severity, str):
+                severity = TASK_SEVERITY.get(severity, 1.0)
             post("/api/tasks", {"zone_id": event["zone_id"],
                  "kind": payload.get("issue", "inspection"),
-                 "severity": payload.get("severity", "act_today"),
+                 "severity": severity,
                  "source_event": event.get("event_id"), "note": f"Review bay issue for {goal}"})
         summary = f"{goal}: mission queued for {', '.join(bays)}; {len(flagged)} flagged issues."
         post("/api/events", {"site_id": "demo-warehouse", "zone_id": bays[0],
