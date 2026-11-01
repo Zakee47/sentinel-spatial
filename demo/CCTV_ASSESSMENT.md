@@ -29,7 +29,15 @@ Source times come from the CCTV workstream's emission-time instrumentation. Even
 
 Three separate **real `gpt-6-luna` `engagement_level` calls** assess unblurred person crops at 19.07, 22.20 and 31.73 seconds from this same recording. They are fresh calls on the final unblurred inputs, as requested by Zak, not reused results from the superseded masked crops. They are separate from the perception event run, not confirmations that its look/pass-by labels are correct.
 
-Each inset shows the exact image submitted, its source time, returned score, confidence and policy. The supplied raw-response log records crop bounds/hashes and mock-disabled request metadata. A changed crop needs a new call: never reuse an old blurred-crop result as if it assessed the unblurred image.
+Each inset shows the exact image submitted, its source time, returned score and confidence; the submission footer and table below also show routing policy. The supplied raw-response log records crop bounds/hashes and mock-disabled request metadata. A changed crop needs a new call: never reuse an old blurred-crop result as if it assessed the unblurred image.
+
+| CCTV time | Model's top label | Engagement score (0–3) | Confidence | Policy | Measured call time |
+| ---: | --- | ---: | ---: | --- | ---: |
+| 19.067 s | passing | 0.04 | 0.96 | auto | 2.633 s |
+| 22.200 s | browsing | 1.93 | 0.93 | auto | 0.468 s |
+| 31.733 s | glancing | 1.34 | 0.58 | review | 0.642 s |
+
+These are the **fresh unblurred-crop results**. The earlier whole-crop-blurred passing/browsing tie is superseded: do not carry its zero confidence or old scores into this assessment. The third fresh result is a glancing estimate routed to review. Each crop selects the largest detected person at that time, which need not be the track that emitted an event.
 
 The engagement **score is on a 0–3 scale, not a probability or accuracy**. Confidence and review/ignore policy are separate. A single image cannot verify walking, stopping, a product pick-up, a purchase or intent; model labels remain estimates.
 
@@ -42,3 +50,9 @@ The engagement **score is on a 0–3 scale, not a probability or accuracy**. Con
 - **Not anonymised:** Zak explicitly requested no blur for this public CCTV example, including the fresh API crops. Temporary track IDs do not make visible faces anonymous. No face recognition or cross-visit identity is used, but this export is not privacy-safe customer footage; production redaction needs site-level validation.
 
 Use the CCTV-only submission cut, not the superseded Pexels/RTSP snapshot montage. The broader presentation still shows separately labelled dashboard and drone simulations; they must not be presented as results generated from this clip.
+
+## Delivered submission video
+
+`sentinel-submission-cctv.mp4`: **60.30 seconds, 1920×1080, H.264, 19.22 MB**, silent, real-time playback, faststart, no slides. It uses only the final unblurred ACTi assessment. FFprobe and full FFmpeg decode passed; the overlapping first/second call insets and third review result were visually inspected after rendering.
+
+The assessment input and crop images remain separate licensed attachments, not git blobs. The supplied fresh raw-response log is `decisions_real_v2.jsonl`; its three crop hashes/dimensions were independently matched to the delivered images. The final event JSONL is byte-identical to the original verified six-event run. No old blurred-crop scores were reused. A public video-host share link is still needed for the form.

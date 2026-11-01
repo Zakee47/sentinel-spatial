@@ -9,7 +9,7 @@ Sentinel is a spatial-AI prototype that analyses CCTV footage with temporary per
 
 **Public GitHub repository:** https://github.com/Zakee47/sentinel-spatial
 
-**Demo video:** Zak requested the CCTV example with assessments of the same footage. Use the CCTV-only replacement, `sentinel-submission-cctv.mp4`, once delivered—not the earlier simulated-dashboard cut or longer presentation montage. The form requires at most 90 seconds of the working product and no slides. Upload to YouTube (unlisted), Loom, or Drive; allow anyone with the link to view and check in a signed-out browser before pasting the link. A Devin attachment is not a public video link.
+**Demo video:** Use the delivered CCTV-only replacement, `sentinel-submission-cctv.mp4`: **60.30 seconds, 1920×1080 H.264, 19.22 MB, no slides**. It assesses the ACTi example itself, not the earlier simulated-dashboard cut or longer presentation montage. The form requires at most 90 seconds of the working product and no slides. Upload to YouTube (unlisted), Loom, or Drive; allow anyone with the link to view and check in a signed-out browser before pasting the link. A Devin attachment is not a public video link.
 
 ## Submission checks
 
