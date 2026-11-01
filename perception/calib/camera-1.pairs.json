@@ -1,0 +1,9 @@
+[
+ {"px": [790, 440], "twin": [2.9, 1.45, 0.95], "what": "shopper hip centre (stands in aisle in front of shelf-3)"},
+ {"px": [800, 95],  "twin": [2.9, 1.45, 1.62], "what": "shopper eye level"},
+ {"px": [445, 30],  "twin": [2.6, 2.0, 1.65], "what": "bottle she reaches for, top shelf front"},
+ {"px": [470, 160], "twin": [2.6, 2.0, 1.40], "what": "top shelf board, right end"},
+ {"px": [10, 170],  "twin": [1.4, 2.0, 1.40], "what": "top shelf board, left image edge"},
+ {"px": [440, 715], "twin": [2.2, 2.0, 0.45], "what": "front shelf edge, bottom of frame"},
+ {"px": [1060, 690], "twin": [3.3, 1.05, 0.0], "what": "floor beside trolley wheel"}
+]
