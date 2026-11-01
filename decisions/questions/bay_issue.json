@@ -1,0 +1,38 @@
+{
+  "version": "1.1.0",
+  "name": "bay_issue",
+  "type": "choice",
+  "input_text": "Current photo of one warehouse rack bay (pick faces and cartons), taken by a fixed camera or the patrol drone.",
+  "instructions": "Compare the current bay photo with how the bay should look. What is the main issue with this bay right now?",
+  "reference_text": "Reference photo of this same bay when correctly stocked and labelled:",
+  "choices": [
+    {
+      "value": "ok",
+      "description": "Bay matches its expected state: pick faces stocked, cartons in place, labels readable."
+    },
+    {
+      "value": "low_stock",
+      "description": "Every pick face still has some stock, but one or more are clearly depleted (roughly a quarter full or less)."
+    },
+    {
+      "value": "empty",
+      "description": "At least one whole pick face or beam level that should hold stock (stocked in the reference) has no cartons at all; the rest of the bay may be fine."
+    },
+    {
+      "value": "misplaced",
+      "description": "An extra or wrong carton or pallet is present where it should not be: in the wrong slot, overhanging, rotated, on the floor, or from another product family. A gap with nothing in it is empty, not misplaced."
+    },
+    {
+      "value": "label_issue",
+      "description": "A location or product label is missing, damaged, covered or unreadable."
+    },
+    {
+      "value": "obstruction",
+      "description": "Something blocks the bay or aisle in front of it: debris, a trolley, a person, spilled goods."
+    },
+    {
+      "value": "other",
+      "description": "A problem not covered above, or the photo is too blurred or dark to judge."
+    }
+  ]
+}

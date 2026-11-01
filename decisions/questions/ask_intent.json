@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "name": "ask_intent",
+  "type": "choice",
+  "input_text": "A question typed by a store or warehouse manager into the 'Ask Sentinel' box.",
+  "instructions": "Which intent best matches the manager's question?",
+  "choices": "from_caller"
+}

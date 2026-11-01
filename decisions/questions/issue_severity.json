@@ -1,0 +1,25 @@
+{
+  "version": "1.0.0",
+  "name": "issue_severity",
+  "type": "score",
+  "input_text": "Current photo of a warehouse rack bay, plus the issue already detected for this bay as JSON.",
+  "instructions": "How urgently does the detected issue in this bay need staff action?",
+  "levels": [
+    {
+      "label": "none",
+      "description": "No real issue; the detection was a false alarm or purely cosmetic."
+    },
+    {
+      "label": "minor",
+      "description": "Worth fixing at the next routine check; no impact on picking today."
+    },
+    {
+      "label": "act_today",
+      "description": "Will affect picking or stock accuracy today; create a task for this shift."
+    },
+    {
+      "label": "act_now",
+      "description": "Picking is blocked or there is a safety risk (falling load, blocked aisle); act immediately."
+    }
+  ]
+}
