@@ -1,0 +1,47 @@
+Creating new Ultralytics Settings v0.0.8 file ✅ 
+View Ultralytics Settings with 'yolo settings' or at '/home/ubuntu/.config/Ultralytics/settings.json'
+Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/usage/settings
+[camera] camera-1 pose from calib:camera-1.json; centre [0.26, 0.89, 1.27]
+[KDownloading https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.pt to 'yolo26n-pose.pt': 14% ━╸────────── 1.1/7.5MB 10.4MB/s 0.1s<0.6s[KDownloading https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.pt to 'yolo26n-pose.pt': 43% ━━━━━─────── 3.2/7.5MB 21.6MB/s 0.2s<0.2s[KDownloading https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.pt to 'yolo26n-pose.pt': 98% ━━━━━━━━━━━╸ 7.4/7.5MB 41.7MB/s 0.3s<0.0s[KDownloading https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.pt to 'yolo26n-pose.pt': 100% ━━━━━━━━━━━━ 7.5MB 24.7MB/s 0.3s
+[31m[1mrequirements:[0m Ultralytics requirement ['lap>=0.5.12'] not found, attempting AutoUpdate...
+Collecting lap>=0.5.12
+  Downloading lap-0.5.13-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.6 kB)
+Requirement already satisfied: numpy>=1.21.6 in /home/ubuntu/sentinel-spatial/.venv/lib/python3.12/site-packages (from lap>=0.5.12) (2.5.4)
+Downloading lap-0.5.13-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (1.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 83.6 MB/s eta 0:00:00
+Installing collected packages: lap
+Successfully installed lap-0.5.13
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.2
+[notice] To update, run: /home/ubuntu/sentinel-spatial/.venv/bin/python -m pip install --upgrade pip
+
+[31m[1mrequirements:[0m AutoUpdate success ✅ 1.0s
+WARNING ⚠️ [31m[1mrequirements:[0m [1mRestart runtime or rerun command for updates to take effect[0m
+
+[h264 @ 0x5e4164cdbe00] error while decoding MB 0 32, bytestream -11
+[h264 @ 0x5e4164c7ae80] error while decoding MB 28 22, bytestream -11
+[h264 @ 0x5e4164b972c0] error while decoding MB 8 14, bytestream -14
+[decision] holding_product -> 0.9 conf=0.9 policy=auto 0.00s
+[event] pick_up   zone=aisle-A-shelf-4 track=t7 prod=SKU-016 conf=0.9 {'reach_s': 0.27}
+[decision] reach_outcome -> back_on_shelf conf=0.9 policy=auto 0.00s
+[event] put_back  zone=aisle-A-shelf-4 track=t7 prod=SKU-016 conf=0.9 {'outcome': 'back_on_shelf'}
+[event] pass_by   zone=aisle-A-floor track=t13 prod=None conf=None {}
+[decision] holding_product -> 0.9 conf=0.9 policy=auto 0.00s
+[event] pick_up   zone=aisle-A-shelf-1 track=t13 prod=SKU-005 conf=0.9 {'reach_s': 0.53}
+[event] pass_by   zone=aisle-A-floor track=t14 prod=None conf=None {}
+[decision] reach_outcome -> back_on_shelf conf=0.9 policy=auto 0.00s
+[event] put_back  zone=aisle-A-shelf-1 track=t13 prod=SKU-005 conf=0.9 {'outcome': 'back_on_shelf'}
+[decision] holding_product -> 0.9 conf=0.9 policy=auto 0.00s
+[event] pick_up   zone=aisle-A-shelf-1 track=t14 prod=SKU-005 conf=0.9 {'reach_s': 0.87}
+[decision] reach_outcome -> back_on_shelf conf=0.9 policy=auto 0.00s
+[event] put_back  zone=aisle-A-shelf-1 track=t14 prod=SKU-005 conf=0.9 {'outcome': 'back_on_shelf'}
+[decision] holding_product -> 0.9 conf=0.9 policy=auto 0.00s
+[event] pick_up   zone=aisle-A-shelf-3 track=t14 prod=SKU-011 conf=0.9 {'reach_s': 0.2}
+[decision] holding_product -> 0.9 conf=0.9 policy=auto 0.00s
+[event] pick_up   zone=aisle-A-shelf-2 track=t13 prod=SKU-006 conf=0.9 {'reach_s': 0.73}
+[decision] reach_outcome -> back_on_shelf conf=0.9 policy=auto 0.00s
+[event] put_back  zone=aisle-A-shelf-3 track=t14 prod=SKU-011 conf=0.9 {'outcome': 'back_on_shelf'}
+[h264 @ 0x5e4164c50a40] error while decoding MB 58 13, bytestream -14
+[decision] reach_outcome -> back_on_shelf conf=0.9 policy=auto 0.00s
+[event] put_back  zone=aisle-A-shelf-2 track=t13 prod=SKU-006 conf=0.9 {'outcome': 'back_on_shelf'}
+[done] 1202 frames in 51.9s, 12 events -> /home/ubuntu/perception-wt/perception/out/events.jsonl; video -> /home/ubuntu/perception-wt/perception/out/annotated.mp4; server down (jsonl only)
