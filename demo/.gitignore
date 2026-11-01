@@ -1,0 +1,7 @@
+raw/
+inputs/
+cards/*.png
+output/
+*.mp4
+*.wav
+__pycache__/
