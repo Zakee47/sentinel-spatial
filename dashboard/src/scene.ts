@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { Site, Zone } from './types';
 import type { Store } from './store';
+import { decodePointCloud } from './layers';
 
 const BLUE = 0x317cff;
 const vec = (x: number, y: number, z: number) => new THREE.Vector3(x, z, -y);
@@ -16,6 +17,7 @@ export class TwinScene {
   private heat = new THREE.Group();
   private people = new THREE.Group();
   private drone = new THREE.Group();
+  private depth = new THREE.Group();
   private labels: { el: HTMLElement; position: THREE.Vector3 }[] = [];
   private zoneHeat = new Map<string, THREE.Mesh>();
   private clock = new THREE.Clock();
@@ -42,7 +44,8 @@ export class TwinScene {
     const sun = new THREE.DirectionalLight(0xffffff, 3.2); sun.position.set(-5, 14, 8); sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
     Object.assign(sun.shadow.camera, { left: -15, right: 15, top: 15, bottom: -15 }); sun.shadow.bias = -.001;
     this.scene.add(sun);
-    this.scene.add(this.fallback, this.heat, this.people, this.drone);
+    this.scene.add(this.fallback, this.heat, this.people, this.drone, this.depth);
+    this.depth.visible = false;
     this.box(this.scene, vec(5, 4.6, -.15), [12, .22, 11], 0xe8e5e0);
     const grid = new THREE.GridHelper(12, 24, 0xd2cfc9, 0xdad7d1); grid.position.copy(vec(5, 4.6, -.025)); this.scene.add(grid);
     site.zones.forEach(z => this.makeZone(z));
@@ -71,6 +74,7 @@ export class TwinScene {
     new ResizeObserver(() => this.resize()).observe(host); this.resize();
     this.renderer.setAnimationLoop(() => this.draw());
     void this.loadTwin();
+    void this.loadDepth();
   }
   private bounds(z: Zone) { return { x0: Math.min(...z.polygon_xy.map(p => p[0])), x1: Math.max(...z.polygon_xy.map(p => p[0])), y0: Math.min(...z.polygon_xy.map(p => p[1])), y1: Math.max(...z.polygon_xy.map(p => p[1])) }; }
   private box(parent: THREE.Object3D, position: THREE.Vector3, size: number[], color: number) {
@@ -106,6 +110,23 @@ export class TwinScene {
   topView() { this.camera.position.copy(vec(5, 4.5, 22)); this.controls.target.copy(vec(5, 4.5, 0)); this.controls.update(); }
   toggleHeat(visible: boolean) { this.heat.visible = visible; }
   togglePeople(visible: boolean) { this.showPeople = visible; this.people.visible = visible; }
+  toggleDepth(visible: boolean) { this.depth.visible = visible; }
+  private cloud(buffer: ArrayBuffer, size: number) {
+    const { positions, colors } = decodePointCloud(buffer);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    return new THREE.Points(geometry, new THREE.PointsMaterial({ size, vertexColors: true }));
+  }
+  private async loadDepth() {
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}depth/out/depth_points.bin`);
+      if (!response.ok || response.headers.get('content-type')?.includes('text/html')) return;
+      this.depth.add(this.cloud(await response.arrayBuffer(), .035));
+      const toggle = document.querySelector<HTMLInputElement>('#depth-toggle');
+      if (toggle) { toggle.disabled = false; toggle.parentElement!.title = 'Estimated depth · optional xyzrgb point cloud'; }
+    } catch { /* Optional depth is unavailable; keep its toggle disabled. */ }
+  }
   private resize() { const { clientWidth: w, clientHeight: h } = this.host; this.camera.aspect = w / Math.max(h, 1); this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h); }
   private draw() {
     const t = this.clock.getElapsedTime(); this.controls.update();
@@ -135,10 +156,7 @@ export class TwinScene {
       const info = await res.json();
       if (info.source === 'colmap' && info.point_count > 0) {
         const binary = await fetch(`${base}twin/out/twin_points.bin`); if (!binary.ok) throw new Error('Point cloud missing');
-        const values = new Float32Array(await binary.arrayBuffer()); if (values.length % 6) throw new Error('Invalid cloud');
-        const positions = new Float32Array(values.length / 2), colors = new Float32Array(values.length / 2);
-        for (let i = 0; i < values.length / 6; i++) { positions.set([values[i * 6], values[i * 6 + 2], -values[i * 6 + 1]], i * 3); const rgb = values.slice(i * 6 + 3, i * 6 + 6); colors.set(Array.from(rgb, c => c > 1 ? c / 255 : c), i * 3); }
-        const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(positions, 3)); geo.setAttribute('color', new THREE.BufferAttribute(colors, 3)); this.scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: .025, vertexColors: true }))); this.fallback.visible = false; this.source = 'COLMAP point cloud';
+        this.scene.add(this.cloud(await binary.arrayBuffer(), .025)); this.fallback.visible = false; this.source = 'COLMAP point cloud';
       } else {
         const gltf = await new GLTFLoader().loadAsync(`${base}twin/out/scene.glb`); gltf.scene.rotation.x = -Math.PI / 2; this.scene.add(gltf.scene); this.fallback.visible = false; this.source = info.source === 'simready' ? 'SimReady twin' : 'Metric box twin';
       }
