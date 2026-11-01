@@ -3,7 +3,7 @@
   "up_axis": "Z",
   "site_id": "demo-warehouse",
   "synthetic": true,
-  "colour_encoding": "linear RGB normalized 0..1",
+  "colour_encoding": "sRGB normalized 0..1",
   "objects": [
     {
       "name": "floor",

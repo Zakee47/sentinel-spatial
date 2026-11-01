@@ -1,0 +1,8 @@
+{
+  "description": "EXAMPLE ONLY. Replace ALL colmap coordinates with picks from your own raw.ply. Twin coordinates must be surveyed, non-collinear points in metres.",
+  "pairs": [
+    {"colmap": [0.0, 0.0, 0.0], "twin": [0.0, 0.0, 0.0]},
+    {"colmap": [2.0, 0.0, 0.0], "twin": [10.0, 0.0, 0.0]},
+    {"colmap": [0.0, 1.6, 0.0], "twin": [0.0, 8.0, 0.0]}
+  ]
+}
