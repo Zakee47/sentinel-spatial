@@ -777,7 +777,10 @@ async def agent_run(body: AgentRunIn) -> dict[str, Any]:
 
 @app.get("/api/agent/runs")
 async def agent_runs() -> list[dict[str, Any]]:
-    return S.agent_runs
+    try:
+        return _load_agent().list_runs()
+    except Exception:
+        return S.agent_runs
 
 
 # --------------------------------------------------------------------------------------------
