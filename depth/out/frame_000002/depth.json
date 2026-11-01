@@ -1,0 +1,58 @@
+{
+  "image": "frame_000002.jpg",
+  "timestamp_s": 4.0,
+  "model": "depth-anything/Depth-Anything-V2-Metric-Indoor-Small-hf",
+  "relative": false,
+  "registration": "assumed_camera_pose",
+  "intrinsics": [
+    [
+      320.00000000000006,
+      0.0,
+      319.5
+    ],
+    [
+      0.0,
+      320.00000000000006,
+      179.5
+    ],
+    [
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "depth_median_m": 4.169754981994629,
+  "measured_lidar": false,
+  "source": "video_monocular",
+  "n_points": 20688,
+  "point_count": 20688,
+  "bbox": {
+    "min": [
+      1.9367135763168335,
+      -9.546915547549723,
+      -4.735148847103118
+    ],
+    "max": [
+      16.726844787597656,
+      8.333449347317217,
+      6.350482907891273
+    ]
+  },
+  "bounds_min": [
+    1.9367135763168335,
+    -9.546915547549723,
+    -4.735148847103118
+  ],
+  "bounds_max": [
+    16.726844787597656,
+    8.333449347317217,
+    6.350482907891273
+  ],
+  "voxel_m": 0.05,
+  "frame": "twin",
+  "color_range": [
+    0,
+    1
+  ],
+  "format": "little-endian float32 x,y,z,r,g,b"
+}
