@@ -52,6 +52,13 @@ def list_runs() -> list[dict]:
     return _store()
 
 
+DEFAULT_ORG_ID = "org-3e3903fc352442af8b96c7a5098f0774"
+
+
+def is_mock() -> bool:
+    return os.environ.get("SENTINEL_AGENT_MOCK", "1") != "0"
+
+
 def _api_config() -> tuple[str, str, str]:
     key = os.environ.get("DEVIN_API_KEY", "")
     if not key:
@@ -61,9 +68,7 @@ def _api_config() -> tuple[str, str, str]:
         raise DevinAPIError("DEVIN_API_VERSION must be v1 or v3")
     base = os.environ.get("DEVIN_API_BASE", "https://api.devin.ai").rstrip("/")
     if version == "v3":
-        org = os.environ.get("DEVIN_ORG_ID")
-        if not org:
-            raise DevinAPIError("DEVIN_ORG_ID is required for v3")
+        org = os.environ.get("DEVIN_ORG_ID") or DEFAULT_ORG_ID
         base += f"/v3/organizations/{quote(org, safe='')}/sessions"
     else:
         base += "/v1/sessions"
@@ -86,7 +91,7 @@ def _request(method: str, url: str, key: str, **kwargs: object) -> dict:
 def launch(goal: str, api_base: str) -> dict:
     if not goal.strip() or not api_base.strip():
         raise ValueError("goal and api_base must not be empty")
-    mock = os.environ.get("SENTINEL_AGENT_MOCK") == "1"
+    mock = is_mock()
     if mock:
         session_id = "mock-" + uuid.uuid4().hex
         url = f"https://app.devin.ai/sessions/{session_id}"

@@ -15,7 +15,7 @@ source agent/.venv/bin/activate
 pip install -e 'agent[dev]'
 uvicorn agent.stub_server:app --port 8000
 # in another shell, with the same venv activated:
-SENTINEL_AGENT_MOCK=1 python -m agent.cli 'end-of-shift stock check' --api-base http://localhost:8000 --wait
+python -m agent.cli 'end-of-shift stock check' --api-base http://localhost:8000 --wait
 python -m agent.cli --list
 python -m agent.cli --status SESSION_ID
 ```
@@ -31,7 +31,7 @@ httpx-compatible client for tests.
 For real Devin sessions, start the Sentinel API, run `bash agent/tunnel.sh`
 (downloads cloudflared into ignored `agent/.bin` if absent), and pass the
 printed HTTPS URL as `--api-base`. Set `DEVIN_API_KEY` in the environment,
-never in a file or prompt. `cog_` keys select v3 and require `DEVIN_ORG_ID`;
+never in a file or prompt. Mock mode is the default; set `SENTINEL_AGENT_MOCK=0` for real launches. `cog_` keys select v3 org-scoped session creation (`DEVIN_ORG_ID`, default `org-3e3903fc352442af8b96c7a5098f0774`);
 other keys select legacy v1. `DEVIN_API_VERSION=v1|v3` overrides selection;
 `DEVIN_API_BASE` overrides `https://api.devin.ai`. Real status queries call
 the Devin API; `--wait` is mock-only. `SENTINEL_AGENT_RUNS` overrides the

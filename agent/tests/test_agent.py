@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 @pytest.fixture(autouse=True)
 def isolated(monkeypatch, tmp_path):
     monkeypatch.setenv("SENTINEL_AGENT_RUNS", str(tmp_path / "runs.json"))
-    monkeypatch.delenv("SENTINEL_AGENT_MOCK", raising=False)
+    monkeypatch.setenv("SENTINEL_AGENT_MOCK", "0")
     monkeypatch.delenv("DEVIN_API_VERSION", raising=False)
     monkeypatch.setenv("DEVIN_API_BASE", "https://devin.example")
 
@@ -70,8 +70,12 @@ def test_configuration_and_empty(monkeypatch):
         agent.status("missing")
     monkeypatch.setenv("DEVIN_API_KEY", "cog_test")
     monkeypatch.delenv("DEVIN_ORG_ID", raising=False)
-    with pytest.raises(agent.DevinAPIError, match="DEVIN_ORG_ID"):
-        agent.launch("goal", "https://sentinel.example")
+    assert agent._api_config()[1].endswith(f"/v3/organizations/{agent.DEFAULT_ORG_ID}/sessions")
+
+
+def test_mock_is_default(monkeypatch):
+    monkeypatch.delenv("SENTINEL_AGENT_MOCK", raising=False)
+    assert agent.is_mock()
 
 
 def test_mock_end_to_end(monkeypatch):

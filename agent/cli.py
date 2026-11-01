@@ -2,10 +2,9 @@
 
 import argparse
 import json
-import os
 import sys
 
-from agent.sentinel_agent import DevinAPIError, launch, list_runs, status, wait
+from agent.sentinel_agent import DevinAPIError, is_mock, launch, list_runs, status, wait
 
 
 def main() -> int:
@@ -25,7 +24,7 @@ def main() -> int:
         else:
             if not args.goal:
                 parser.error("goal is required unless using --list or --status")
-            if args.wait and os.environ.get("SENTINEL_AGENT_MOCK") != "1":
+            if args.wait and not is_mock():
                 parser.error("--wait is supported in mock mode only")
             run = launch(args.goal, args.api_base)
             print(run["url"], flush=True)
