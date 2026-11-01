@@ -11,6 +11,7 @@ fi
 FOOTAGE="${1:-${CCTV_FOOTAGE:-$DEFAULT_FOOTAGE}}"
 [[ "$FOOTAGE" = /* ]] || FOOTAGE="$REPO_ROOT/$FOOTAGE"
 CAMERA_ID="${CAMERA_ID:-camera-1}"
+CCTV_FPS="${CCTV_FPS:-30}"
 VERSION="v1.9.3"
 BIN_DIR="$SCRIPT_DIR/bin"
 RTSP_URL="rtsp://localhost:8554/$CAMERA_ID"
@@ -34,6 +35,10 @@ if [[ ! -f "$FOOTAGE" ]]; then
 fi
 if [[ ! "$CAMERA_ID" =~ ^[a-zA-Z0-9_-]+$ ]]; then
   echo 'CAMERA_ID must contain only letters, digits, underscores, or hyphens.' >&2
+  exit 1
+fi
+if [[ ! "$CCTV_FPS" =~ ^[1-9][0-9]*$ ]]; then
+  echo 'CCTV_FPS must be a positive integer.' >&2
   exit 1
 fi
 for cmd in curl tar ffmpeg; do
@@ -83,8 +88,8 @@ FILTER+=",drawtext=$FONT:text='%{localtime}':x=20:y=60:fontsize=24:fontcolor=whi
 FILTER+=",drawtext=$FONT:text='REC':x=w-tw-24:y=20:fontsize=24:fontcolor=red:box=1:boxcolor=black@0.75:boxborderw=8"
 printf 'Publishing %s -> %s\n' "$FOOTAGE" "$RTSP_URL"
 ffmpeg -hide_banner -loglevel warning -nostdin -re -stream_loop -1 -i "$FOOTAGE" \
-  -an -vf "$FILTER" -r 30 -c:v libx264 -preset veryfast -tune zerolatency \
-  -pix_fmt yuv420p -g 30 -keyint_min 30 -sc_threshold 0 \
+  -an -vf "$FILTER" -r "$CCTV_FPS" -c:v libx264 -preset veryfast -tune zerolatency \
+  -pix_fmt yuv420p -g "$CCTV_FPS" -keyint_min "$CCTV_FPS" -sc_threshold 0 \
   -f rtsp -rtsp_transport tcp "$RTSP_URL" &
 FFMPEG_PID=$!
 wait -n "$MEDIA_PID" "$FFMPEG_PID"
